@@ -2,7 +2,7 @@
  * @Author: yunlu.lai1@dbappsecurity.com.cn yunlu.lai1@dbappsecurity.com.cn
  * @Date: 2024-12-24 09:38:50
  * @LastEditors: yunlu.lai1@dbappsecurity.com.cn yunlu.lai1@dbappsecurity.com.cn
- * @LastEditTime: 2024-12-26 15:00:45
+ * @LastEditTime: 2024-12-26 17:40:14
  * @FilePath: \code-mirror\mirror-hight\src\utils\getHighlightedHtml.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -106,15 +106,58 @@ export function getHighlightedHtml(code, mode, theme, customStyles = {},containe
   styleTag.textContent = newStyles;
   // styleTag.textContent = cleanStyles(newStyles);
   if (CodeMirror && CodeMirror.runMode) {
-    CodeMirror.runMode(code, mode, (text, style) => {
-      const span = document.createElement('span');
-      if (style) {
-        // console.log(style, 'style');
-        span.className = ` cm-${style}`; // 添加高亮样式类
+    // CodeMirror.runMode(code, mode, (text, style) => {
+    //   const span = document.createElement('span');
+    //   if (style) {
+    //     // console.log(style, 'style');
+    //     span.className = ` cm-${style}`; // 添加高亮样式类
+    //   }
+    //   span.textContent = text;
+    //   pre.appendChild(span);
+    // });
+    console.log(code,'code');
+
+    if(Array.isArray(code)){
+      console.log(code,'code');
+      
+      code.forEach(logEntry => {
+      if (logEntry.trim() === '') {
+        // 空行处理
+        // pre.appendChild(document.createElement('br'));
+        return;
       }
-      span.textContent = text;
-      pre.appendChild(span);
-    });
+
+      // 直接将换行符 \n 交给 <pre> 标签来处理
+      // 将 \n 转换为 <br> 标签来显示换行
+      const logWithBreaks = logEntry.replace(/\n/g);  // 替换 \n 为 <br>
+
+      // 对每条日志使用 CodeMirror 高亮处理
+      CodeMirror.runMode(logWithBreaks, mode, (text, style) => {
+        const span = document.createElement('span');
+        if (style) {
+          span.className = `cm-${style}`; // 添加高亮样式类
+        }
+        span.textContent = text; // 保持文本内容的高亮
+        pre.appendChild(span); // 添加每条日志
+      });
+
+      // 每条日志结束后添加换行
+      pre.appendChild(document.createElement('br'));  // 每行日志后添加换行
+    })
+    }else if(typeof code==='string' ){
+
+      CodeMirror.runMode(code, mode, (text, style) => {
+        const span = document.createElement('span');
+        if (style) {
+          span.className = `cm-${style}`; // 添加高亮样式类
+        }
+        span.innerHTML = text; // 使用 innerHTML 来允许 <br> 标签的显示
+        pre.appendChild(span); // 添加代码
+      });
+          
+      }else {
+        console.error('Invalid code format. It should be either a string or an array of strings.');
+      }
   } else {
     console.error('CodeMirror runMode is not available.');
   }
