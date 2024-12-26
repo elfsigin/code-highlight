@@ -1,0 +1,64 @@
+.cm-s-logLang .cm-file-path {
+  color: purple;
+  font-style: italic;
+}
+
+.cm-s-logLang .cm-line-number {
+  color: #888;
+}
+
+.cm-s-logLang .cm-function-name {
+  color: teal;
+  font-weight: bold;
+}
+
+.cm-s-logLang .cm-exception-type {
+  color: red;
+  font-weight: bold;
+}
+
+.cm-s-logLang .cm-exception-code {
+  color: orange;
+}
+
+.cm-s-logLang .cm-exception-message {
+  color: black;
+}
+
+.cm-s-logLang .cm-url {
+  color: blue;
+  text-decoration: underline;
+}
+
+.cm-s-logLang .cm-date {
+  color: gray;
+}
+
+.cm-s-logLang .cm-info {
+  color: green;
+}
+
+.cm-s-logLang .cm-debug {
+  color: blue;
+}
+
+.cm-s-logLang .cm-warning {
+  color: orange;
+}
+
+.cm-s-logLang .cm-error {
+  color: red;
+}
+
+.cm-s-logLang .cm-critical {
+  color: darkred;
+  font-weight: bold;
+}
+
+.cm-s-logLang .cm-file-name {
+  color: purple;
+}
+
+.cm-s-logLang .cm-message {
+  color: black;
+}
