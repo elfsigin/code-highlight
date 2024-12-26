@@ -6,7 +6,7 @@ import { getHighlightedHtml } from '../../utils/getHighlightedHtml'; // 引入�
 const ParamsHight = () => {
   const [stringCode, setStringCode] = useState(`const mergedStyles = mergeStyles(defaultStyles, customStyles);
       console.log("Merged Styles:\\n", mergedStyles); `);
-  const [arrrayCode, setArrayCode] = useState(`function greet() {\n  console.log("Hello, CodeMirror!");\n}`);
+  const [arrrayCode, setArrayCode] = useState([(`2024-12-13 10:00:07,185 | INFO | system.py:2609 - migrate asset password export result: password_export: true\n`),(`2024-12-134 10:00:07,185 | INFO | system.py:2609 - migrate asset password export result: password_export: true\n`)]);
   const containerRef1 = useRef(null); // 用于渲染高亮代码的容器
   const containerRef2 = useRef(null); // 用于渲染高亮代码的容器
   const [language, setLanguage] = useState('javascript');
