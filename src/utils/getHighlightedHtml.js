@@ -1,8 +1,8 @@
 /*
  * @Author: yunlu.lai1@dbappsecurity.com.cn yunlu.lai1@dbappsecurity.com.cn
  * @Date: 2024-12-24 09:38:50
- * @LastEditors: yunlu.lai1@dbappsecurity.com.cn yunlu.lai1@dbappsecurity.com.cn
- * @LastEditTime: 2024-12-26 15:00:45
+ * @LastEditors: yunlu.lai1@dbappsecurity.com.cn 2714838232@qq.com
+ * @LastEditTime: 2024-12-30 16:28:58
  * @FilePath: \code-mirror\mirror-hight\src\utils\getHighlightedHtml.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -23,7 +23,7 @@ import {
 } from '../theme/defaultcss'
 
 
-
+//日志自定义高亮关键字
 CodeMirror.defineSimpleMode("logLang", {
   start: [
     // 文件路径和代码行号
@@ -77,84 +77,189 @@ CodeMirror.defineSimpleMode("logLang", {
     }
   ]
 });
-export function getHighlightedHtml(code, mode, theme, customStyles = {},container, ) {
+
+export function getHighlightedHtml(
+  code,
+  mode,
+  theme,
+  customStyles = {},
+  container,
+  customHighlight = [] //用户自定义高亮规则
+
+) {
   if (!container) {
     throw new Error("A container element is required to render highlighted code.");
   }
 
-  // 创建 <style> 和 <pre> 标签
-  const divContainer = document.createElement('div');
+  // 清空容器
+  container.innerHTML = '';
+  //代码：  代码行pre（CodeMirror-line）->大spna（presentation） ->各小span
+  //行号：div（CodeMirror-gutter-wrapper-> div（CodeMirror-linenumber CodeMirror-gutter-elt 数字
+  //大盒子 div divline（包括）
+  //大盒子  div位gutter（position left：0）+ divline
+
+  //包括一层大容器（槽号和代码行并列）
+  const scrollDiv = document.createElement('div');
+  scrollDiv.style.display = 'flex';
+  // scrollDiv.style.backgroundColor = '#353f58';
+  scrollDiv.style.maxHeight = '500px';
+
+  // 创建主容器(放置行号和槽号)
+  const divContainer = document.createElement('div')
+  divContainer.style.position = 'relative';
+
+  //创建gutter容器,存放行号槽(与lines同级)
+  const DivGutter = document.createElement('div')
+  DivGutter.style.position = 'absolute';
+  DivGutter.style.height = '500px';
+  DivGutter.style.boxSizing = 'content-box'
+  DivGutter.style.width = '29px';
+  DivGutter.style.background = '#3f4b69';
+  DivGutter.style.left = '0px';
+  // 创建lines容器(放置行code和槽号数字)
+  const divContainerLines = document.createElement('div');
+  divContainerLines.style.position = 'relative';
+  divContainerLines.style.marginLeft = '29px';
+  divContainerLines.style.backgroundColor = '#353f58';
+  divContainerLines.style.maxHeight = '500px'
+
+  // 创建 <pre> 标签
+  const pre = document.createElement('pre');
+  pre.style.backgroundColor = '#353f58';
+  pre.style.color = '#dcdcdc';
+  pre.style.height = '500px';
+  pre.style.overflowX = 'auto';
+  pre.style.lineHeight = '1.5em';
+  pre.style.fontFamily = 'monospace';
+  //将DivGutter与codemirror-line并列
+  divContainer.appendChild(DivGutter)
+  // 创建 <style> 标签
   const styleTag = document.createElement('style');
-  divContainer.appendChild(styleTag); // 将 style 标签加入 div 中
-
-  const pre = document.createElement('pre'); // 创建 <pre> 标签
-  pre.style.backgroundColor = 'rgb(51, 76, 105)'; // 设置背景色
-  pre.style.color = 'rgb(12, 12, 12)'; // 设置文字颜色
-  pre.style.padding = '10px';
-  pre.style.borderRadius = '10px';
-  // pre.className=`cm-s-${theme}`
-
-  let newStyles = '';
-  if (mode === 'logLang') {
-    newStyles = stylesDefaultLog;
-  } else {
-    newStyles = stylesDefault;
-  }
+  divContainer.appendChild(styleTag);
+  // 合并样式
+  let newStyles = mode === 'logLang' ? stylesDefaultLog : stylesDefault;
   if (customStyles) {
     newStyles = mergeStyles(newStyles, customStyles);
-  }  
+  }
   styleTag.textContent = newStyles;
-  // styleTag.textContent = cleanStyles(newStyles);
+
+  // 处理代码内容t
   if (CodeMirror && CodeMirror.runMode) {
-    CodeMirror.runMode(code, mode, (text, style) => {
-      const span = document.createElement('span');
-      if (style) {
-        // console.log(style, 'style');
-        span.className = ` cm-${style}`; // 添加高亮样式类
-      }
-      span.textContent = text;
-      pre.appendChild(span);
+    const lines = typeof code === 'string' ? code.split('\n') : code; // 将字符串按行分割    
+
+    // console.log(code.split('\n'),"code.split('\n')");
+
+    lines.forEach((line, index) => {
+      if (line.trim() === '') return;
+
+      // 创建行号
+      const lineDiv = document.createElement('div');
+      lineDiv.style.position = "relative";
+
+      const lineNumberDiv = document.createElement('div');
+      lineNumberDiv.style.position = 'absolute';
+      lineNumberDiv.style.left = '-29px';
+      lineNumberDiv.style.color = '#fff';
+      lineNumberDiv.style.display = 'inline-block';
+      lineNumberDiv.style.width = '29px'; // 行号宽度，适配多位数行号
+      lineNumberDiv.style.textAlign = 'center';
+      lineNumberDiv.style.zIndex = '4';
+      lineNumberDiv.style.fontSize = '14px';
+
+      lineNumberDiv.textContent = String(index + 1);
+      lineDiv.appendChild(lineNumberDiv)
+
+      // 渲染代码行
+      const codeDiv = document.createElement('div');
+      const codeSpan = document.createElement('span');
+      codeSpan.style.paddingLeft='4px';
+      CodeMirror.runMode(line, mode, (text, style) => {
+        const span = document.createElement('span');
+        if (style) {
+          span.className = `cm-${style}`;
+        }
+        span.textContent = text;
+        codeSpan.appendChild(span);
+        codeDiv.appendChild(codeSpan);
+      });
+      // 创建行容器
+      const lineContainer = document.createElement('div');
+      lineContainer.appendChild(lineNumberDiv);
+      lineContainer.appendChild(codeDiv);
+      pre.appendChild(lineContainer);
     });
   } else {
-    console.error('CodeMirror runMode is not available.');
   }
-  // 将 <pre> 标签添加到 <div> 容器中
-  divContainer.appendChild(pre);
-
-  container.innerHTML = ''; // 清空容器内容
-  container.appendChild(divContainer); // 将高亮的代码添加到容器中
-  console.log(divContainer,'divContainer');
-  const logInfo = () => {
-    // 确保 CodeMirror 和 runMode 正常加载
-    console.log(CodeMirror, 'CodeMirror'); // 输出 CodeMirror，确保它被正确加载
-    console.log(CodeMirror.runMode, 'runMode'); // 确保 runMode 是一个函数
-  }
-
+  // 将 <pre> 添加到容器中
+  divContainerLines.appendChild(pre);
+  divContainer.appendChild(divContainerLines)
+  container.appendChild(divContainer);
 }
 
+
+
+// 样式合并函数
 function mergeStyles(defaultStyles, customStyles) {
   const styleMap = {};
-
-  // 解析默认样式为键值对
   defaultStyles.split('}').forEach(rule => {
     const [selector, styles] = rule.split('{');
     if (selector && styles) {
       styleMap[selector.trim()] = styles.trim();
     }
   });
-
-  // 合并自定义样式
   for (const [key, value] of Object.entries(customStyles)) {
     const selector = `.cm-${key}`;
-    styleMap[selector] = value; 
+    styleMap[selector] = value;
   }
-
-  // 转换为格式化的样式字符串
   return Object.entries(styleMap)
     .map(([selector, styles]) => `${selector} { ${styles} }`)
     .join('\n');
 }
+
+
 //去掉样式style的格式
 function cleanStyles(styles) {
   return styles.replace(/\s+/g, ' ').trim(); // 去除多余空白
+}
+
+function renderLineWithCustomRules({
+  line,
+  lineNumber,
+  language,
+  customHighlight
+}) {
+  let renderedLine = line;
+
+  // 应用自定义规则
+  customHighlight.forEach(({
+    match,
+    render
+  }) => {
+    const matches = [...line.matchAll(match)];
+    matches.forEach((matchedItem) => {
+      const renderedContent = render(matchedItem[0], {
+        lineNumber,
+        match: matchedItem,
+        regex: match,
+      });
+      if (renderedContent) {
+        renderedLine = renderedLine.replace(matchedItem[0], renderedContent);
+      }
+    });
+  });
+
+  // 如果有语言高亮模式，使用 CodeMirror
+  if (CodeMirror && CodeMirror.runMode) {
+    const codeSpan = document.createElement("span");
+    CodeMirror.runMode(line, language, (text, style) => {
+      const span = document.createElement("span");
+      if (style) {
+        span.className = `cm-${style}`;
+      }
+      span.textContent = text;
+      codeSpan.appendChild(span);
+    });
+    return codeSpan.innerHTML;
+  }
+  return renderedLine; // 返回最终渲染结果
 }
