@@ -1,0 +1,94 @@
+/* 主题样式 */
+.cm-s-custom-theme .CodeMirror {
+
+}
+
+
+.cm-s-custom-theme .CodeMirror-gutters {
+    background-color: #3f4b69;
+    border-right: 1px solid #353f58;
+    height: 500px;
+    min-height: 500px;
+}
+
+.cm-s-custom-theme .CodeMirror-gutters {
+    width: 30px;
+    background-color: rgb(63, 75, 105);
+}
+.cm-s-custom-theme CodeMirror-gutter-wrapper {
+    left: 30px;
+    
+}
+
+.cm-s-custom-theme .CodeMirror-sizer {
+    margin-left: 29px;
+    background-color: rgb(53, 63, 88);
+    height: 500px;
+    min-height: 500px;
+}
+
+.cm-s-custom-theme .CodeMirror-linenumber {
+    padding: 0;
+    color: #ffffff;
+    text-align: center;
+    width: 30px;
+}
+
+.cm-s-custom-theme .cm-comment {
+    color: rgb(37, 72, 111);
+}
+
+.cm-s-custom-theme .cm-atom {
+    color: rgb(88, 81, 100);
+}
+
+.cm-s-custom-theme .cm-number {
+    color: #D1EDFF;
+}
+
+.cm-s-custom-theme .cm-property,
+.cm-s-custom-theme .cm-attribute {
+    color: rgb(66, 69, 229);
+}
+
+.cm-s-custom-theme .cm-keyword {
+    color: rgb(163, 251, 47);
+}
+
+.cm-s-custom-theme .cm-string {
+    color: rgb(230, 50, 56);
+}
+
+.cm-s-custom-theme .cm-variable,
+.cm-s-custom-theme .cm-variable-2 {
+    color: rgb(255, 62, 168);
+}
+
+.cm-s-custom-theme .cm-def {
+    color: #4DD;
+}
+
+.cm-s-custom-theme .cm-bracket {
+    color: #D1EDFF;
+}
+
+.cm-s-custom-theme .cm-tag {
+    color: rgb(100, 183, 97);
+}
+
+.cm-s-custom-theme .cm-link {
+    color: #AE81FF;
+}
+
+.cm-s-custom-theme .cm-error {
+    background: #F92672;
+    color: #F8F8F0;
+}
+
+.cm-s-custom-theme .CodeMirror-cursor {
+    border-left: 2px solid #AE81FF;
+}
+
+.cm-s-custom-theme .CodeMirror-selected {
+    background: rgba(255, 255, 255, 0.1);
+}
