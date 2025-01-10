@@ -17,10 +17,9 @@ import "codemirror/mode/sql/sql"; // 导入 JavaScript 模式
 import "codemirror/mode/clike/clike"; // Java 属于 clike 模式
 import "codemirror/mode/shell/shell"; // Java 属于 clike 模式
 
-
 import { stylesDefaultLog, stylesDefault } from "../theme/defaultcss";
 import "../theme/theme.css";
-import parseLogs from 'parse-logs';
+import parseLogs from "parse-logs";
 function parseLog(log) {
   try {
     const parsedLog = parseLogs(log); // 解析日志
@@ -34,132 +33,149 @@ function parseLog(log) {
 // 日志自定义高亮
 CodeMirror.defineSimpleMode("logLang", {
   start: [
-  // 时间匹配：日期
-  {
-    regex: /(\d{4}[-\/]\d{2}[-\/]\d{2})(?:[ T](\d{2}:\d{2}(:\d{2})?(\.\d{3}|\,\d{3})?))?/,
-    token: "date"
-  },
-  // 级别匹配
-  {
-    regex: /\b(DEBUG|INFO|INFORMATION|WARN|WARNING|ERROR|FAIL|FAILURE)\b/,
-    token: function(match) {
-      switch (match[0]) {
-        case "DEBUG":
-          return "log-level debug";
-        case "INFO":
-          return "log-level info";
-        case "INFORMATION":
-          return "log-level info";
-        case "WARN":
-          return "log-level warning";
-        case "WARNING":
-          return "log-level warning";
-        case "ERROR":
-          return "log-level error";
-        case "FAIL":
-          return "log-level fail";
-        case "FAILURE":
-          return "log-level fail";
-        default:
-          return "log-level";
-      }
-    }
-  },
-  // 匹配字符串常量（确保匹配在日期和日志级别之后）
-  {
-    regex: /(['"]).*?\1/,
-    token: "string-constant"
-  },
-  // 匹配布尔值常量 (true / false)
-  {
-    regex: /\b(true|false)\b/,
-    token: "boolean-constant"
-  },
-  // 匹配空值常量 (null)
-  {
-    regex: /\bnull\b/,
-    token: "null-constant"
-  },
-  // 匹配整数常量
-  {
-    regex: /\b\d+\b(?!\.\d)/, // 匹配整数，不允许后面跟着小数点
-    token: "integer-constant"
-  },
-  // 匹配浮点数常量
-  {
-    regex: /\b\d+\.\d+\b/,
-    token: "float-constant"
-  },
+    // 时间匹配：日期
+    {
+      regex:
+        /(\d{4}[-\/]\d{2}[-\/]\d{2})(?:[ T](\d{2}:\d{2}(:\d{2})?(\.\d{3}|\,\d{3})?))?/,
+      token: "date",
+    },
+    // 级别匹配
+    {
+      regex: /\b(DEBUG|INFO|INFORMATION|WARN|WARNING|ERROR|FAIL|FAILURE)\b/,
+      token: function (match) {
+        switch (match[0]) {
+          case "DEBUG":
+            return "log-level debug";
+          case "INFO":
+            return "log-level info";
+          case "INFORMATION":
+            return "log-level info";
+          case "WARN":
+            return "log-level warning";
+          case "WARNING":
+            return "log-level warning";
+          case "ERROR":
+            return "log-level error";
+          case "FAIL":
+            return "log-level fail";
+          case "FAILURE":
+            return "log-level fail";
+          default:
+            return "log-level";
+        }
+      },
+    },
+    // 匹配字符串常量（确保匹配在日期和日志级别之后）
+    {
+      regex: /(['"]).*?\1/,
+      token: "string-constant",
+    },
+    // 匹配布尔值常量 (true / false)
+    {
+      regex: /\b(true|false)\b/,
+      token: "boolean-constant",
+    },
+    // 匹配空值常量 (null)
+    {
+      regex: /\bnull\b/,
+      token: "null-constant",
+    },
+    // 匹配整数常量
+    {
+      regex: /\b\d+\b(?!\.\d)/, // 匹配整数，不允许后面跟着小数点
+      token: "integer-constant",
+    },
+    // 匹配浮点数常量
+    {
+      regex: /\b\d+\.\d+\b/,
+      token: "float-constant",
+    },
 
-  // mac地址
-  {
-    regex: /\b([0-9a-fA-F]{2}[-:]){5}[0-9a-fA-F]{2}\b/,
-    token: "mac"
-  },
+    // mac地址
+    {
+      regex: /\b([0-9a-fA-F]{2}[-:]){5}[0-9a-fA-F]{2}\b/,
+      token: "mac",
+    },
 
-  // 网址
-  {
-    regex: /(https?:\/\/[^\s]+)/,
-    token: "url"
-  },
+    // 网址
+    {
+      regex: /(https?:\/\/[^\s]+)/,
+      token: "url",
+    },
 
-  // IP 地址（IPv4 和 IPv6）
-  {
-    regex: /(\b(?:\d{1,3}\.){3}\d{1,3}\b|\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b)/,
-    token: "ip-address"
-  },
+    // IP 地址（IPv4 和 IPv6）
+    {
+      regex:
+        /(\b(?:\d{1,3}\.){3}\d{1,3}\b|\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b)/,
+      token: "ip-address",
+    },
 
-  // GUID
-  {
-    regex: /\b([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\b/,
-    token: "guid"
-  },
+    // GUID
+    {
+      regex:
+        /\b([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\b/,
+      token: "guid",
+    },
 
-  // 匹配 .NET 异常类型名称
-  {
-    regex: /\b([A-Z][a-zA-Z]*Exception)\b/,
-    token: "exception-type"
-  },
+    // 匹配 .NET 异常类型名称
+    {
+      regex: /\b([A-Z][a-zA-Z]*Exception)\b/,
+      token: "exception-type",
+    },
 
-  // 匹配 .NET 异常堆栈跟踪
-  {
-    regex: /at\s([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*)\.(\w+)\(\)\s*in\s([a-zA-Z0-9_\\\/\.]+):line\s(\d+)/,
-    token: ["exception-stack", "class-name", "method-name", "file-path", "line-number"]
-  },
+    // 匹配 .NET 异常堆栈跟踪
+    {
+      regex:
+        /at\s([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*)\.(\w+)\(\)\s*in\s([a-zA-Z0-9_\\\/\.]+):line\s(\d+)/,
+      token: [
+        "exception-stack",
+        "class-name",
+        "method-name",
+        "file-path",
+        "line-number",
+      ],
+    },
 
-  // 匹配错误代码 (SQLAlchemy 错误码、HTTP 错误码等)
-  {
-    regex: /\b(?:\d{3})\b/,
-    token: "error-code"
-  },
+    // 匹配错误代码 (SQLAlchemy 错误码、HTTP 错误码等)
+    {
+      regex: /\b(?:\d{3})\b/,
+      token: "error-code",
+    },
 
-  // 捕获 "user" 信息，例如 "user: admin"
-  {
-    regex: /user:\s*(\w+)/,
-    token: "user-info"
-  },
+    // 捕获 "user" 信息，例如 "user: admin"
+    {
+      regex: /user:\s*(\w+)/,
+      token: "user-info",
+    },
 
-  // 匹配异常堆栈信息 (at functionName (path/to/file.py:123))
-  {
-    regex: /^\s*at\s([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*)\.(\w+)\(\)\s*in\s([a-zA-Z0-9_\\\/.]+):line\s(\d+)/,
-    token: ["exception-stack", "class-name", "method-name", "file-path", "line-number"]
-  },
-  // 匹配文件路径和行号
-  {
-    regex: /([a-zA-Z0-9_\/\\\.\-]+\.py):(\d+)/,
-    token: ["file-path", "integer-constant"]
-  },
-  // 匹配日志消息
-  {
-    regex: /- (.+)/,
-    token: "message"
-  } 
+    // 匹配异常堆栈信息 (at functionName (path/to/file.py:123))
+    {
+      regex:
+        /^\s*at\s([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*)\.(\w+)\(\)\s*in\s([a-zA-Z0-9_\\\/.]+):line\s(\d+)/,
+      token: [
+        "exception-stack",
+        "class-name",
+        "method-name",
+        "file-path",
+        "line-number",
+      ],
+    },
+    // 匹配文件路径和行号
+    {
+      regex: /([a-zA-Z0-9_\/\\\.\-]+\.py):(\d+)/,
+      token: ["file-path", "integer-constant"],
+    },
+    // 匹配日志消息
+    {
+      regex: /- (.+)/,
+      token: "message",
+    },
   ],
 });
 
-function highlightRunMode(code,mode,codeSpan){
-  CodeMirror.runMode(code,mode,(text,style)=>{
-    const span=document.createElement("span");
+function highlightRunMode(code, mode, codeSpan) {
+  CodeMirror.runMode(code, mode, (text, style) => {
+    const span = document.createElement("span");
     if (style) {
       span.className = `cm-${style}`;
     }
@@ -175,7 +191,7 @@ export function getHighlightedHtml(
   customStyles = {},
   container,
   customHighlight = [],
-  isEdit,
+  isEdit
 ) {
   if (!container) {
     throw new Error(
@@ -200,7 +216,6 @@ export function getHighlightedHtml(
   divContainer.style.position = "relative";
   divContainer.style.height = "300px";
   divContainer.style.width = "1256px";
-
 
   //创建gutter容器,存放行号槽(与lines同级)
   const DivGutter = document.createElement("div");
@@ -242,49 +257,49 @@ export function getHighlightedHtml(
   }
   styleTag.textContent = newStyles;
   // 处理代码内容
-  if (CodeMirror && CodeMirror.runMode&&!isEdit) {
+  if (CodeMirror && CodeMirror.runMode && !isEdit) {
     // 创建行号
     const lineDiv = document.createElement("div");
     lineDiv.style.position = "relative";
 
-    let lines=code.split("\n");
-    console.log(lines,'lines');   
+    let lines = code.split("\n");
+    console.log(lines, "lines");
     //行容器
     const lineContainer = document.createElement("div");
     // lineContainer.style.backgroundColor = "yellow";
 
-    lines.forEach((line,index)=>{
-    const lineNumberDiv = document.createElement("div");
-    lineNumberDiv.style.position = "absolute";
-    lineNumberDiv.style.top = `${index * 15}px`; // 根据行号的顺序垂直排列
-    // lineNumberDiv.style.backgroundColor = "red";
-    lineNumberDiv.style.height = "15px";
+    lines.forEach((line, index) => {
+      const lineNumberDiv = document.createElement("div");
+      lineNumberDiv.style.position = "absolute";
+      lineNumberDiv.style.top = `${index * 15}px`; // 根据行号的顺序垂直排列
+      // lineNumberDiv.style.backgroundColor = "red";
+      lineNumberDiv.style.height = "15px";
 
-    lineNumberDiv.style.left = "-31px";
-    lineNumberDiv.style.color = "#fff";
-    lineNumberDiv.style.display = "inline-block";
-    lineNumberDiv.style.width = "31px"; // 行号宽度，适配多位数行号
-    lineNumberDiv.style.textAlign = "center";
-    lineNumberDiv.style.paddingTop = "4px";
-    lineNumberDiv.style.zIndex = "4";
-    lineNumberDiv.style.fontSize = "14px";
-    console.log(index,'index');
-    lineNumberDiv.innerText = index+1;
-    lineDiv.appendChild(lineNumberDiv);
+      lineNumberDiv.style.left = "-31px";
+      lineNumberDiv.style.color = "#fff";
+      lineNumberDiv.style.display = "inline-block";
+      lineNumberDiv.style.width = "31px"; // 行号宽度，适配多位数行号
+      lineNumberDiv.style.textAlign = "center";
+      lineNumberDiv.style.paddingTop = "4px";
+      lineNumberDiv.style.zIndex = "4";
+      lineNumberDiv.style.fontSize = "14px";
+      console.log(index, "index");
+      lineNumberDiv.innerText = index + 1;
+      lineDiv.appendChild(lineNumberDiv);
 
-    lineContainer.appendChild(lineNumberDiv);
-    })
+      lineContainer.appendChild(lineNumberDiv);
+    });
 
     const codeDiv = document.createElement("div");
-    codeDiv.style.paddingTop="4px";
+    codeDiv.style.paddingTop = "4px";
 
     const codeSpan = document.createElement("span");
     // codeSpan.style.paddingLeft = "4px";
-     if(customHighlight){
-      customHighlighted(code,mode,codeSpan,customHighlight);
-     }else{
-      highlightRunMode(code,mode,codeSpan);
-     }
+    if (customHighlight) {
+      customHighlighted(code, mode, codeSpan, customHighlight);
+    } else {
+      highlightRunMode(code, mode, codeSpan);
+    }
     console.log(codeSpan, "codeSpan");
     codeDiv.appendChild(codeSpan);
     // 创建行容器
@@ -337,65 +352,64 @@ function preprocessCustomContent(code, customHighlight) {
       const matchedText = matchItem[0]; // 被匹配的文本
       // 在传递给 renderFn 时，确保传递了有效的参数
       const renderedContent = renderFn(matchedText, { match: matchItem });
-      processedCode=processedCode.replace(
+      processedCode = processedCode.replace(
         matchedText,
         `<span data-html="true">${renderedContent}</span>`
-      )
+      );
     });
   });
-  console.log(processedCode,'processedCode');
-  
+  console.log(processedCode, "processedCode");
+
   return processedCode;
 }
-function customHighlighted(code,mode,codeSpan,customHighlight){
-  
+function customHighlighted(code, mode, codeSpan, customHighlight) {
   let processedCode = preprocessCustomContent(code, customHighlight); // 获取处理过的代码
-    // 提取代码块（普通代码和自定义块）
-    console.log(processedCode,'processedCode');
-    
-    const customBlocks = [
-      ...processedCode.matchAll(
-         /<span data-html="true">([\s\S]*?)<\/span>|([^<]+)/g
-      ),
-    ];
-    console.log(customBlocks,'customBlocks');
-    
-    customBlocks.forEach((block) => {
-      const [fullMatch,htmlContent,textContent]=block;
-      if(htmlContent){
-        const htmlElement = document.createElement("div");
-        console.log(htmlContent,'htmlContent');
-        htmlElement.style.display="inline-block";
-        htmlElement.innerHTML = htmlContent; // 直接渲染 HTML
-        // console.log(htmlElement,'htmlElement');
-        codeSpan.appendChild(htmlElement);
-      }
-      if(textContent){
-         highlightRunMode(textContent,mode,codeSpan)
-      }
-})
+  // 提取代码块（普通代码和自定义块）
+  console.log(processedCode, "processedCode");
+
+  const customBlocks = [
+    ...processedCode.matchAll(
+      /<span data-html="true">([\s\S]*?)<\/span>|([^<]+)/g
+    ),
+  ];
+  console.log(customBlocks, "customBlocks");
+
+  customBlocks.forEach((block) => {
+    const [fullMatch, htmlContent, textContent] = block;
+    if (htmlContent) {
+      const htmlElement = document.createElement("div");
+      console.log(htmlContent, "htmlContent");
+      htmlElement.style.display = "inline-block";
+      htmlElement.innerHTML = htmlContent; // 直接渲染 HTML
+      // console.log(htmlElement,'htmlElement');
+      codeSpan.appendChild(htmlElement);
+    }
+    if (textContent) {
+      highlightRunMode(textContent, mode, codeSpan);
+    }
+  });
 }
-export function editCode(code,mode,container){
-   console.log(container,'container'); 
-   container.innerHTML='';
-   const editor=CodeMirror(container,{
-    value:code,
+export function editCode(code, mode, container) {
+  console.log(container, "container");
+  container.innerHTML = "";
+  const editor = CodeMirror(container, {
+    value: code,
     mode,
-    lineNumbers:true,
-    theme:"custom-theme",
-    readOnly:false
-   })
+    lineNumbers: true,
+    theme: "custom-theme",
+    readOnly: false,
+  });
 }
-export function editText(code,mode,container,isEdit){
-  console.log(container,'c');
-  const textArea=document.createElement('textarea');
-  textArea.value=code;
-  container.innerHTML='';
+export function editText(code, mode, container, isEdit) {
+  console.log(container, "c");
+  const textArea = document.createElement("textarea");
+  textArea.value = code;
+  container.innerHTML = "";
   container.appendChild(textArea);
-  const editor =CodeMirror.fromTextArea(textArea,{
-    value:code,
+  const editor = CodeMirror.fromTextArea(textArea, {
+    value: code,
     mode,
-    lineNumbers:true,
-    theme:"custom-theme"
-  })  
+    lineNumbers: true,
+    theme: "custom-theme",
+  });
 }
