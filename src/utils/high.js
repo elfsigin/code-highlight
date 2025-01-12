@@ -2,7 +2,7 @@
  * @Author: yunlu.lai1@dbappsecurity.com.cn yunlu.lai1@dbappsecurity.com.cn
  * @Date: 2024-12-24 09:38:50
  * @LastEditors: yunlu.lai1@dbappsecurity.com.cn 2714838232@qq.com
- * @LastEditTime: 2025-01-10 15:10:48
+ * @LastEditTime: 2025-01-12 15:02:51
  * @FilePath: \code-mirror\mirror-hight\src\utils\getHighlightedHtml.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -173,14 +173,14 @@ CodeMirror.defineSimpleMode("logLang", {
   ],
 });
 
-function highlightRunMode(code, mode, codeSpan) {
+function highlightRunMode(code, mode, codeContainerLine) {
   CodeMirror.runMode(code, mode, (text, style) => {
     const span = document.createElement("span");
     if (style) {
       span.className = `cm-${style}`;
     }
     span.textContent = text;
-    codeSpan.appendChild(span);
+    codeContainerLine.appendChild(span);
   });
 }
 
@@ -215,14 +215,15 @@ export function getHighlightedHtml(
   const divContainer = document.createElement("div");
   divContainer.style.position = "relative";
   divContainer.style.height = "300px";
-  divContainer.style.width = "1256px";
+  divContainer.style.overflowY = "auto"; // 启用垂直滚动
+  divContainer.style.width = "1240px";
 
   //创建gutter容器,存放行号槽(与lines同级)
   const DivGutter = document.createElement("div");
   DivGutter.style.position = "absolute";
   DivGutter.style.height = "500px";
   DivGutter.style.boxSizing = "content-box";
-  DivGutter.style.width = "39px";
+  DivGutter.style.width = "31px";
   DivGutter.style.background = "#3f4b69";
   DivGutter.style.left = "0px";
   // 创建lines容器(放置行code和槽号数字)
@@ -232,7 +233,7 @@ export function getHighlightedHtml(
   divContainerLines.style.paddingLeft = "4px";
   divContainerLines.style.paddingRight = "4px";
   divContainerLines.style.backgroundColor = "#353f58";
-  divContainerLines.style.maxHeight = "500px";
+  divContainerLines.style.maxHeight = "500px"; //设置滚动区高度
 
   // 创建 <pre> 标签
   const pre = document.createElement("pre");
@@ -241,7 +242,7 @@ export function getHighlightedHtml(
   pre.style.height = "500px";
   pre.style.overflowX = "auto";
   pre.style.margin = "0";
-  pre.style.whiteSpace = "pre-wrap"; // 保持空格，但会自动换行
+  // pre.style.whiteSpace = "pre-wrap"; // 保持空格，但会自动换行
   // pre.style.lineHeight = "1.2em";
   pre.style.fotSize = "14px";
   pre.style.fontFamily = "monospace";
@@ -263,18 +264,28 @@ export function getHighlightedHtml(
     lineDiv.style.position = "relative";
 
     let lines = code.split("\n");
-    console.log(lines, "lines");
     //行容器
     const lineContainer = document.createElement("div");
     // lineContainer.style.backgroundColor = "yellow";
 
+    const codeDiv = document.createElement("div");
+    codeDiv.style.paddingTop = "4px";
+
+    // 计算每行的高度
+    const lineHeight = 20; // 每行的高度，根据实际情况调整
+    // 计算容器可见区域的行数
+    const visibleLines = Math.floor(divContainer.offsetHeight / lineHeight);    
+    const totalLines = code.split("\n").length;
+
     lines.forEach((line, index) => {
+      console.log(line, "line");
+      const divContainerLines = document.createElement("div");
+      //处理行号
       const lineNumberDiv = document.createElement("div");
       lineNumberDiv.style.position = "absolute";
-      lineNumberDiv.style.top = `${index * 15}px`; // 根据行号的顺序垂直排列
+      lineNumberDiv.style.top = `${index * 15.2}px`; // 根据行号的顺序垂直排列
       // lineNumberDiv.style.backgroundColor = "red";
       lineNumberDiv.style.height = "15px";
-
       lineNumberDiv.style.left = "-31px";
       lineNumberDiv.style.color = "#fff";
       lineNumberDiv.style.display = "inline-block";
@@ -283,31 +294,34 @@ export function getHighlightedHtml(
       lineNumberDiv.style.paddingTop = "4px";
       lineNumberDiv.style.zIndex = "4";
       lineNumberDiv.style.fontSize = "14px";
-      console.log(index, "index");
       lineNumberDiv.innerText = index + 1;
-      lineDiv.appendChild(lineNumberDiv);
+      // console.log(lineNumberDiv, "lineNumberDiv");
 
-      lineContainer.appendChild(lineNumberDiv);
+      // lineDiv.appendChild(lineNumberDiv);
+
+      divContainerLines.appendChild(lineNumberDiv);
+
+      // const codeContainerLine=document.createElement("div");
+      // codeContainerLine.style.backGround="red";
+      // // codeContainerLine.textContent="red";
+      // lineContainer.appendChild(codeContainerLine);
+      const codeContainerLine = document.createElement("pre");
+      codeContainerLine.style.whiteSpace = "pre-wrap";
+      codeContainerLine.style.margin = "0";
+
+      // codeContainerLine.style.paddingLeft = "4px";
+      if (customHighlight) {
+        customHighlighted(line, mode, codeContainerLine, customHighlight);
+      } else {
+        highlightRunMode(line, mode, codeContainerLine);
+      }
+      divContainerLines.appendChild(codeContainerLine);
+      codeDiv.appendChild(divContainerLines);
     });
 
-    const codeDiv = document.createElement("div");
-    codeDiv.style.paddingTop = "4px";
-
-    const codeSpan = document.createElement("span");
-    // codeSpan.style.paddingLeft = "4px";
-    if (customHighlight) {
-      customHighlighted(code, mode, codeSpan, customHighlight);
-    } else {
-      highlightRunMode(code, mode, codeSpan);
-    }
-    console.log(codeSpan, "codeSpan");
-    codeDiv.appendChild(codeSpan);
-    // 创建行容器
-    // const lineContainer = document.createElement("div");
-    // lineContainer.appendChild(lineNumberDiv);
     lineContainer.appendChild(codeDiv);
     pre.appendChild(lineContainer);
-    // 将 <pre> 添加到容器中
+
     divContainerLines.appendChild(pre);
     divContainer.appendChild(divContainerLines);
     container.appendChild(divContainer);
@@ -342,7 +356,7 @@ function preprocessCustomContent(code, customHighlight) {
   // 遍历所有自定义高亮规则并进行处理
   customHighlight.forEach(({ match, renderFn }) => {
     if (typeof renderFn !== "function") {
-      console.error("renderFn should be a function, but got", typeof renderFn);
+      // console.error("renderFn should be a function, but got", typeof renderFn);
       return;
     }
     // 获取匹配的内容
@@ -358,34 +372,31 @@ function preprocessCustomContent(code, customHighlight) {
       );
     });
   });
-  console.log(processedCode, "processedCode");
+  // console.log(processedCode, "processedCode");
 
   return processedCode;
 }
-function customHighlighted(code, mode, codeSpan, customHighlight) {
+function customHighlighted(code, mode, codeContainerLine, customHighlight) {
   let processedCode = preprocessCustomContent(code, customHighlight); // 获取处理过的代码
   // 提取代码块（普通代码和自定义块）
-  console.log(processedCode, "processedCode");
 
   const customBlocks = [
     ...processedCode.matchAll(
       /<span data-html="true">([\s\S]*?)<\/span>|([^<]+)/g
     ),
   ];
-  console.log(customBlocks, "customBlocks");
 
   customBlocks.forEach((block) => {
     const [fullMatch, htmlContent, textContent] = block;
     if (htmlContent) {
       const htmlElement = document.createElement("div");
-      console.log(htmlContent, "htmlContent");
       htmlElement.style.display = "inline-block";
       htmlElement.innerHTML = htmlContent; // 直接渲染 HTML
       // console.log(htmlElement,'htmlElement');
-      codeSpan.appendChild(htmlElement);
+      codeContainerLine.appendChild(htmlElement);
     }
     if (textContent) {
-      highlightRunMode(textContent, mode, codeSpan);
+      highlightRunMode(textContent, mode, codeContainerLine);
     }
   });
 }

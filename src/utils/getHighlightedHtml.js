@@ -201,8 +201,8 @@ export function getHighlightedHtml(
       lineDiv.appendChild(lineNumberDiv);
 
       const codeDiv = document.createElement("div");
-      const codeSpan = document.createElement("span");
-      codeSpan.style.paddingLeft = "4px";
+      const codeContainerLine = document.createElement("span");
+      codeContainerLine.style.paddingLeft = "4px";
 
 
       //先进行默认高亮处理
@@ -218,18 +218,18 @@ export function getHighlightedHtml(
           span.className = `cm-${style}`;
         }
         span.textContent = text;
-        codeSpan.appendChild(span);
-        codeDiv.appendChild(codeSpan);
+        codeContainerLine.appendChild(span);
+        codeDiv.appendChild(codeContainerLine);
       });
       // 如果有自定义高亮规则，进行替换
       // if (customHighlight && customHighlight.length > 0) {
-      //   renderedLine = applyCustomRender(codeSpan,renderedLine, index + 1, customHighlight);
+      //   renderedLine = applyCustomRender(codeContainerLine,renderedLine, index + 1, customHighlight);
       // }
-      // 将渲染后的内容应用到 codeSpan 中
-      //  codeSpan.innerHTML = renderedLine;
-       console.log(codeSpan,'codeSpan');
+      // 将渲染后的内容应用到 codeContainerLine 中
+      //  codeContainerLine.innerHTML = renderedLine;
+       console.log(codeContainerLine,'codeContainerLine');
        
-       codeDiv.appendChild(codeSpan);
+       codeDiv.appendChild(codeContainerLine);
 
       // 创建行容器
       const lineContainer = document.createElement("div");
@@ -269,9 +269,9 @@ function cleanStyles(styles) {
 }
 
 // // 逐行处理已渲染的span标签
-// function applyCustomRender(codeSpan, line, lineNumber, customHighlight) {
+// function applyCustomRender(codeContainerLine, line, lineNumber, customHighlight) {
 //   // 遍历所有span，应用自定义高亮
-//   const spans = codeSpan.querySelectorAll("span");
+//   const spans = codeContainerLine.querySelectorAll("span");
 //   spans.forEach(span => {
 //     let spanText = span.textContent;
 
