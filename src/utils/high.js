@@ -2,9 +2,14 @@
  * @Author: yunlu.lai1@dbappsecurity.com.cn yunlu.lai1@dbappsecurity.com.cn
  * @Date: 2024-12-24 09:38:50
  * @LastEditors: yunlu.lai1@dbappsecurity.com.cn 2714838232@qq.com
- * @LastEditTime: 2025-01-12 15:02:51
+ * @LastEditTime: 2025-01-14 14:11:23
  * @FilePath: \code-mirror\mirror-hight\src\utils\getHighlightedHtml.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ *   //代码：  代码行pre（CodeMirror-line）->大spna（presentation） ->各小span
+  //行号：div（CodeMirror-gutter-wrapper-> div（CodeMirror-linenumber CodeMirror-gutter-elt 数字
+  //大盒子 div divline（包括）
+  //大盒子  div位gutter（position left：0）+ divline
+  //包括一层大容器（槽号和代码行并列）
  */
 import CodeMirror from "codemirror"; // 导入 CodeMirror
 import "codemirror/addon/runmode/runmode.js"; // 引入 runmode.js
@@ -20,16 +25,6 @@ import "codemirror/mode/shell/shell"; // Java 属于 clike 模式
 import { stylesDefaultLog, stylesDefault } from "../theme/defaultcss";
 import "../theme/theme.css";
 import parseLogs from "parse-logs";
-function parseLog(log) {
-  try {
-    const parsedLog = parseLogs(log); // 解析日志
-    console.log(parsedLog); // 查看解析结果
-    return parsedLog;
-  } catch (error) {
-    console.error("日志解析失败:", error);
-    return null;
-  }
-}
 // 日志自定义高亮
 CodeMirror.defineSimpleMode("logLang", {
   start: [
@@ -200,12 +195,7 @@ export function getHighlightedHtml(
   }
   // 清空容器
   container.innerHTML = "";
-  //代码：  代码行pre（CodeMirror-line）->大spna（presentation） ->各小span
-  //行号：div（CodeMirror-gutter-wrapper-> div（CodeMirror-linenumber CodeMirror-gutter-elt 数字
-  //大盒子 div divline（包括）
-  //大盒子  div位gutter（position left：0）+ divline
 
-  //包括一层大容器（槽号和代码行并列）
   const scrollDiv = document.createElement("div");
   scrollDiv.style.display = "flex";
   // scrollDiv.style.backgroundColor = '#353f58';
@@ -233,7 +223,7 @@ export function getHighlightedHtml(
   divContainerLines.style.paddingLeft = "4px";
   divContainerLines.style.paddingRight = "4px";
   divContainerLines.style.backgroundColor = "#353f58";
-  divContainerLines.style.maxHeight = "500px"; //设置滚动区高度
+  // divContainerLines.style.maxHeight = "500px"; //设置滚动区高度
 
   // 创建 <pre> 标签
   const pre = document.createElement("pre");
@@ -253,10 +243,13 @@ export function getHighlightedHtml(
   divContainer.appendChild(styleTag);
   // 合并样式
   let newStyles = mode === "logLang" ? stylesDefaultLog : stylesDefault;
+
   if (customStyles) {
     newStyles = mergeStyles(newStyles, customStyles);
   }
   styleTag.textContent = newStyles;
+  // console.log(styleTag,'styleTag');
+
   // 处理代码内容
   if (CodeMirror && CodeMirror.runMode && !isEdit) {
     // 创建行号
@@ -264,6 +257,7 @@ export function getHighlightedHtml(
     lineDiv.style.position = "relative";
 
     let lines = code.split("\n");
+
     //行容器
     const lineContainer = document.createElement("div");
     // lineContainer.style.backgroundColor = "yellow";
@@ -272,20 +266,94 @@ export function getHighlightedHtml(
     codeDiv.style.paddingTop = "4px";
 
     // 计算每行的高度
-    const lineHeight = 20; // 每行的高度，根据实际情况调整
+    const lineHeight = 15.2; // 每行的高度，根据实际情况调整
     // 计算容器可见区域的行数
-    const visibleLines = Math.floor(divContainer.offsetHeight / lineHeight);    
-    const totalLines = code.split("\n").length;
+
+    //     const updateSoftLineNumbers = (container) => {
+    //       console.log(container,'container');
+
+    //       container.childNodes.forEach((item) => {
+    //         const lineDiv = document.createElement("div");
+    //         lineDiv.innerHTML = "";
+    //         const height = window.getComputedStyle(item).getPropertyValue('height');
+    //         // const height = window.getComputedStyle(item).getPropertyValue('height');
+    //         // const height = parseFloat(computedStyle.height); // 高度（px）
+    //         // const lineHeight = parseFloat(computedStyle.lineHeight); // 行高（px）
+
+    //         // 计算总行数
+    //         const numberOfLines = Math.floor(height / 15.2);
+    //         // 获取当前行的高度（如果没有指定则使用默认行高）
+    //         console.log(height,'height');
+
+    //         let lineHeightInPixels =
+    //           item.offsetHeight
+    //         // let lineHeightInPixels = parseFloat(
+    //         //   // window.getComputedStyle(item).lineHeight
+    //         //   item.getBoundingClientRect().height
+    //         // );
+    //         console.log(
+    //           lineHeightInPixels,
+    //           "lineHeight"
+    //         );
+
+    //         if (isNaN(lineHeightInPixels)) {
+    //           lineHeightInPixels = lineHeight; // 使用默认的行高
+    //         }
+
+    //         const visibleLines = Math.ceil(item.scrollHeight / lineHeightInPixels);
+    //         console.log(visibleLines, "visibleLines");
+
+    //         for (let i = 0; i < visibleLines; i++) {
+    //           const lineNumberDiv = document.createElement("div");
+    //           lineNumberDiv.innerText = `${i + 1}`;
+    //           lineNumberDiv.style.height = `${lineHeight}px`;
+    //           lineNumberDiv.style.top = `${lineHeight * i}px`;
+    //           // lineNumberDiv.style.backgroundColor = "red";
+    //           lineNumberDiv.style.textAlign = "center";
+    //           lineNumberDiv.style.position = "absolute";
+    //           lineNumberDiv.style.left = "-31px";
+    //           lineNumberDiv.style.color = "#fff";
+    //           lineNumberDiv.style.display = "inline-block";
+    //           lineNumberDiv.style.width = "31px"; // 行号宽度，适配多位数行号
+    //           lineNumberDiv.style.paddingTop = "4px";
+    //           lineNumberDiv.style.zIndex = "4";
+    //           lineNumberDiv.style.fontSize = "14px";
+
+    //           lineDiv.appendChild(lineNumberDiv);
+
+    //         }
+    //         divContainerLines.appendChild(lineDiv);
+    //       });
+    //     };
+    //     code.split("\n").forEach((line) => {
+    //       const divContainerLines = document.createElement("div");
+
+    //       const codeContainerLine = document.createElement("pre");
+    //       codeContainerLine.style.whiteSpace = "pre-wrap";
+    //       codeContainerLine.style.margin = "0";
+    //       codeContainerLine.style.paddingLeft = "4px";
+    //       codeContainerLine.style.lineHeight = "15.2px";
+    //       codeContainerLine.style.minHeight = "15.2px";  // 或者移除height属性
+
+    //       if (customHighlight.length > 0) {
+    //         customHighlighted(line, mode, codeContainerLine, customHighlight);
+    //       } else {
+    //         highlightRunMode(line, mode, codeContainerLine);
+    //       }
+
+    //       divContainerLines.appendChild(codeContainerLine);
+    //       codeDiv.appendChild(divContainerLines);
+    //       updateSoftLineNumbers(codeDiv);
+    //     });
 
     lines.forEach((line, index) => {
       console.log(line, "line");
       const divContainerLines = document.createElement("div");
-      //处理行号
       const lineNumberDiv = document.createElement("div");
       lineNumberDiv.style.position = "absolute";
       lineNumberDiv.style.top = `${index * 15.2}px`; // 根据行号的顺序垂直排列
       // lineNumberDiv.style.backgroundColor = "red";
-      lineNumberDiv.style.height = "15px";
+      lineNumberDiv.style.height = "15.2px";
       lineNumberDiv.style.left = "-31px";
       lineNumberDiv.style.color = "#fff";
       lineNumberDiv.style.display = "inline-block";
@@ -295,23 +363,21 @@ export function getHighlightedHtml(
       lineNumberDiv.style.zIndex = "4";
       lineNumberDiv.style.fontSize = "14px";
       lineNumberDiv.innerText = index + 1;
-      // console.log(lineNumberDiv, "lineNumberDiv");
-
-      // lineDiv.appendChild(lineNumberDiv);
-
       divContainerLines.appendChild(lineNumberDiv);
 
-      // const codeContainerLine=document.createElement("div");
-      // codeContainerLine.style.backGround="red";
-      // // codeContainerLine.textContent="red";
-      // lineContainer.appendChild(codeContainerLine);
       const codeContainerLine = document.createElement("pre");
       codeContainerLine.style.whiteSpace = "pre-wrap";
       codeContainerLine.style.margin = "0";
 
       // codeContainerLine.style.paddingLeft = "4px";
-      if (customHighlight) {
-        customHighlighted(line, mode, codeContainerLine, customHighlight);
+      if (customHighlight.length > 0) {
+        customHighlighted(
+          line,
+          mode,
+          codeContainerLine,
+          customHighlight,
+          styleTag
+        );
       } else {
         highlightRunMode(line, mode, codeContainerLine);
       }
@@ -321,9 +387,9 @@ export function getHighlightedHtml(
 
     lineContainer.appendChild(codeDiv);
     pre.appendChild(lineContainer);
-
     divContainerLines.appendChild(pre);
     divContainer.appendChild(divContainerLines);
+    // generateSoftLineNumbers(divContainer, code, mode);
     container.appendChild(divContainer);
   }
 }
@@ -353,8 +419,12 @@ function cleanStyles(styles) {
 // 修改 renderFn 以支持自定义渲染操作，并返回一个带有标识的对象
 function preprocessCustomContent(code, customHighlight) {
   let processedCode = code;
+  // 用于存储所有自定义的class和style
+
+  let allCustomStyles = "";
+  const addedStyles = new Set(); // 用于缓存已经添加的样式，避免重复
   // 遍历所有自定义高亮规则并进行处理
-  customHighlight.forEach(({ match, renderFn }) => {
+  customHighlight.forEach(({ match, renderFn, style, className }) => {
     if (typeof renderFn !== "function") {
       // console.error("renderFn should be a function, but got", typeof renderFn);
       return;
@@ -364,22 +434,66 @@ function preprocessCustomContent(code, customHighlight) {
     // 遍历所有匹配项并进行替换
     matches.forEach((matchItem) => {
       const matchedText = matchItem[0]; // 被匹配的文本
+
+      // 处理 className，确保是有效的类名字符串
+      let classStr = "";
+      if (Array.isArray(className)) {
+        // 如果 className 是一个数组，遍历每个对象
+        className.forEach((classObj) => {
+          for (let classKey in classObj) {
+            // 获取类名
+            classStr += `${classKey} `;
+            const classStyles = classObj[classKey];
+
+            // 只添加未添加的样式
+            if (!addedStyles.has(classKey)) {
+              addedStyles.add(classKey);
+              // 生成 CSS 样式
+              allCustomStyles += `
+                 .${classKey} {
+                   ${Object.entries(classStyles)
+                     .map(([key, value]) => `${key}: ${value};`)
+                     .join(" ")}
+                 }
+               `;
+            }
+          }
+        });
+      } else if (typeof className === "string") {
+        classStr = className;
+      }
       // 在传递给 renderFn 时，确保传递了有效的参数
-      const renderedContent = renderFn(matchedText, { match: matchItem });
+      const renderedContent = renderFn(matchedText, {
+        match: matchItem,
+        style: style || "",
+        className: classStr.trim(), // 确保 className 是有效的
+      });
+      //自定义代码内容
       processedCode = processedCode.replace(
         matchedText,
         `<span data-html="true">${renderedContent}</span>`
       );
     });
   });
-  // console.log(processedCode, "processedCode");
-
-  return processedCode;
+  return {
+    processedCode,
+    allCustomStyles,
+  };
 }
-function customHighlighted(code, mode, codeContainerLine, customHighlight) {
-  let processedCode = preprocessCustomContent(code, customHighlight); // 获取处理过的代码
-  // 提取代码块（普通代码和自定义块）
 
+function customHighlighted(
+  code,
+  mode,
+  codeContainerLine,
+  customHighlight,
+  styleTag
+) {
+  let { processedCode, allCustomStyles } = preprocessCustomContent(
+    code,
+    customHighlight
+  );
+  // 获取处理过的代码
+  styleTag.textContent += allCustomStyles;
   const customBlocks = [
     ...processedCode.matchAll(
       /<span data-html="true">([\s\S]*?)<\/span>|([^<]+)/g
@@ -423,4 +537,71 @@ export function editText(code, mode, container, isEdit) {
     lineNumbers: true,
     theme: "custom-theme",
   });
+}
+// @param {HTMLElement} codeContainer - 包含代码的容器，行号和代码行将被添加到其中。
+export function generateSoftLineNumbers(
+  codeContainer,
+  code,
+  mode,
+  customHighlight = [],
+  lineHeight = 15.2
+) {
+  codeContainer.innerHTML = "";
+
+  const outerContainer = document.createElement("div");
+  outerContainer.style.display = "flex";
+  outerContainer.style.flexDirection = "row";
+  // outerContainer.style.backgroundColor = "yellow";
+
+  //创建行号容器
+  const lineNumberContainer = document.createElement("div");
+  lineNumberContainer.style.width = "30px"; // 固定宽度，容纳行号
+  lineNumberContainer.style.paddingTop = "4px";
+  lineNumberContainer.style.backgroundColor = "#f4f4f4";
+  lineNumberContainer.style.textAlign = "center";
+
+  const codeWrapper = document.createElement("div");
+  codeWrapper.style.flex = "1";
+  codeWrapper.style.whiteSpace = "pre-wrap";
+  codeWrapper.style.overflowY = "auto";
+  codeWrapper.style.maxHeight = "500px";
+  codeWrapper.style.fontFamily = "monospace";
+  codeWrapper.style.lineHeight = `${lineHeight}px`;
+
+  const codeLines = code.split("\n");
+  codeLines.forEach((line, index) => {
+    const codeLineDiv = document.createElement("div");
+    codeLineDiv.textContent = line;
+    //自定义高亮
+    customHighlighted(line, mode, codeLineDiv, customHighlight);
+    codeWrapper.appendChild(codeLineDiv);
+  });
+  const updateLineNumbers = () => {
+    lineNumberContainer.innerHTML = "";
+    let currentLineNumber = 1;
+    codeWrapper.childNodes.forEach((codeLineDiv) => {
+      const wrappedHeight = codeLineDiv.scrollHeight;
+      const visibleLines = Math.ceil(wrappedHeight / lineHeight);
+      for (let i = 0; i < visibleLines; i++) {
+        const lineNumberDiv = document.createElement("div");
+        lineNumberDiv.textContent = currentLineNumber;
+        lineNumberDiv.style.height = `${lineHeight}px`;
+        lineNumberContainer.appendChild(lineNumberDiv);
+        currentLineNumber++;
+      }
+    });
+  };
+  outerContainer.appendChild(lineNumberContainer);
+  outerContainer.appendChild(codeWrapper);
+  codeContainer.appendChild(outerContainer);
+
+  // 初始化和绑定滚动事件
+  updateLineNumbers();
+  codeWrapper.addEventListener("scroll", () => {
+    const scrollTop = codeWrapper.scrollTop;
+    lineNumberContainer.style.transform = `translateY(-${scrollTop}px)`;
+  });
+
+  // 动态调整窗口大小时更新行号
+  window.addEventListener("resize", updateLineNumbers);
 }
