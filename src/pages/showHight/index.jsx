@@ -12,6 +12,21 @@ const ShowHight = () => {
   const [code, setCode] = useState(`2024-12-23 10:30:01 INFO Starting server...
 2024-12-23 10:31:02 ERROR Failed to connect to database.
 2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [
+2024-12-23 10:30:01 INFO Starting server...
+2024-12-23 10:31:02 ERROR Failed to connect to database.
+2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [
+2024-12-23 10:30:01 INFO Starting server...
+2024-12-23 10:31:02 ERROR Failed to connect to database.
+2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [2024-12-23 10:30:01 INFO Starting server...
+2024-12-23 10:31:02 ERROR Failed to connect to database.
+2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [
+2024-12-23 10:30:01 INFO Starting server...
+2024-12-23 10:31:02 ERROR Failed to connect to database.
+2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [2024-12-23 10:32:03 WARN Cache miss detected.const customHighlight = [
+
+
+
+
 `);
   const [edit, setEdit] = useState(true);
   const containerRef = useRef(null); // 用于渲染高亮代码的容器
