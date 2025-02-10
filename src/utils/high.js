@@ -2,7 +2,7 @@
  * @Author: yunlu.lai1@dbappsecurity.com.cn yunlu.lai1@dbappsecurity.com.cn
  * @Date: 2024-12-24 09:38:50
  * @LastEditors: yunlu.lai1@dbappsecurity.com.cn 2714838232@qq.com
- * @LastEditTime: 2025-01-22 14:05:47
+ * @LastEditTime: 2025-02-10 17:20:50
  * @FilePath: \code-mirror\mirror-hight\src\utils\getHighlightedHtml.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  *   //代码：  代码行pre（CodeMirror-line）->大spna（presentation） ->各小span
@@ -21,7 +21,8 @@ import "codemirror/mode/htmlmixed/htmlmixed"; // HTML
 import "codemirror/mode/sql/sql"; // 导入 JavaScript 模式
 import "codemirror/mode/clike/clike"; // Java 属于 clike 模式
 import "codemirror/mode/shell/shell"; // Java 属于 clike 模式
-
+import VirtualScroller from "virtual-scroller/dom";
+// import VirtualScroller from "virtual-scroller";
 import { stylesDefaultLog, stylesDefault } from "../theme/defaultcss";
 import "../theme/theme.css";
 import parseLogs from "parse-logs";
@@ -207,6 +208,7 @@ export function getHighlightedHtml(
   divContainer.style.height = "300px";
   divContainer.style.overflowY = "auto"; // 启用垂直滚动
   divContainer.style.width = "1240px";
+  divContainer.style.backgroundColor = "#353f58";
 
   //创建gutter容器,存放行号槽(与lines同级)
   const DivGutter = document.createElement("div");
@@ -219,164 +221,43 @@ export function getHighlightedHtml(
   // 创建lines容器(放置行code和槽号数字)
   const divContainerLines = document.createElement("div");
   divContainerLines.style.position = "relative";
-
-  // divContainerLines.style.paddingLeft = "4px";
-  // divContainerLines.style.paddingRight = "4px";
   divContainerLines.style.backgroundColor = "#353f58";
   // divContainerLines.style.maxHeight = "500px"; //设置滚动区高度
 
-  // 创建 <pre> 标签
-  const pre = document.createElement("pre");
-  // divContainerLines.style.backgroundColor = "#353f58";
+  const totalLines = code.split("\n").length;
+  const lineHeight = 16;
+
+  DivGutter.style.height = `${totalLines * lineHeight}px`;
+
   divContainerLines.style.color = "#dcdcdc";
-  divContainerLines.style.height = "500px";
-  // divContainerLines.style.overflowX = "auto";
+  divContainerLines.style.minHeight = "500px";
+  divContainerLines.style.overflowY = "auto";
   divContainerLines.style.margin = "0";
-  // divContainerLines.style.whiteSpace = "divContainerLines-wrap"; // 保持空格，但会自动换行
-  // divContainerLines.style.lineHeight = "1.2em";
   divContainerLines.style.fotSize = "14px";
   divContainerLines.style.fontFamily = "monospace";
   divContainerLines.style.marginLeft = "31px";
+
   //将DivGutter与codemirror-line并列
   divContainer.appendChild(DivGutter);
 
   // 创建 <style> 标签
   const styleTag = document.createElement("style");
   divContainer.appendChild(styleTag);
-  // 合并样式
   let newStyles = mode === "logLang" ? stylesDefaultLog : stylesDefault;
-
   if (customStyles) {
     newStyles = mergeStyles(newStyles, customStyles);
   }
   styleTag.textContent = newStyles;
-  // console.log(styleTag,'styleTag');
 
   // 处理代码内容
   if (CodeMirror && CodeMirror.runMode && !isEdit) {
     // 创建行号
-    const lineDiv = document.createElement("div");
-    lineDiv.style.position = "relative";
-
-    // renderCodeWithLineNumbers(
-    //   divContainerLines, // 容器
-    //   code, // 代码
-    //   mode,
-    //   16, // 每行的高度 (可以调整)
-    //   customHighlight, // 高亮行（传递给 highlightLines）,
-    //   styleTag
-    // );
-
-    let lines = code.split("\n");
+    // const lineDiv = document.createElement("div");
+    // lineDiv.style.position = "relative";
 
     //行容器
     const lineContainer = document.createElement("div");
-    lineContainer.style.overflowY = "scroll";
     lineContainer.style.backgroundColor = "yellow";
-
-    // const codeDiv = document.createElement("div");
-    // codeDiv.style.paddingTop = "4px";
-
-    // const renderLineNumbers = (startLine, endLine) => {
-    //   let visibleLines = 0;
-    //   // 计算每行的高度
-    //   const lineHeight = 16; // 每行的高度，根据实际情况调整
-    //   // 计算容器可见区域的行数
-    //   const generateLineNumbers = (lineHeight, visibleLines) => {
-    //     const lineDiv = document.createElement("div");
-    //     for (let i = 0; i < visibleLines; i++) {
-    //       const lineNumberDiv = document.createElement("div");
-    //       lineNumberDiv.innerText = `${i + 1}`;
-    //       lineNumberDiv.style.height = `${lineHeight}px`;
-    //       lineNumberDiv.style.top = `${lineHeight * i}px`;
-    //       lineNumberDiv.style.backgroundColor = "red";
-    //       lineNumberDiv.style.textAlign = "center";
-    //       lineNumberDiv.style.position = "absolute";
-    //       lineNumberDiv.style.left = "-31px";
-    //       lineNumberDiv.style.color = "#fff";
-    //       lineNumberDiv.style.display = "inline-block";
-    //       lineNumberDiv.style.width = "31px"; // 行号宽度，适配多位数行号
-    //       lineNumberDiv.style.paddingTop = "4px";
-    //       lineNumberDiv.style.zIndex = "4";
-    //       lineNumberDiv.style.fontSize = "14px";
-    //       lineNumberDiv.style.fontFamily = "monospace";
-    //       // console.log(lineNumberDiv,'a');
-    //       lineDiv.appendChild(lineNumberDiv);
-    //     }
-    //     codeDiv.appendChild(lineDiv);
-    //   };
-    //   const updateSoftLineNumbers = (container) => {
-    //     const containerHeight = container.clientHeight; // 获取容器的高度
-    //     console.log(container.offsetParent, "container.offsetParent()");
-
-    //     const scrollTop = container.scrollTop; // 获取容器的滚动位置
-    //     container.addEventListener("scroll", () => {
-    //       const scrollTop = container.scrollTop;
-    //       console.log(scrollTop); // 每次滚动时都会输出新的 scrollTop 值
-    //     });
-
-    //     const allVisibleLines = Math.ceil(containerHeight / lineHeight); // 可见行数
-    //     console.log(allVisibleLines, "allvisibleLines");
-    //     generateLineNumbers(lineHeight, allVisibleLines);
-
-    //     container.childNodes.forEach((item) => {
-    //       console.log(item);
-
-    //       let lineHeightInPixels = parseFloat(
-    //         item.getBoundingClientRect().height
-    //       );
-    //       if (lineHeightInPixels > 16) {
-    //         console.log(lineHeightInPixels, "lineHeight");
-    //       }
-    //       if (isNaN(lineHeightInPixels)) {
-    //         lineHeightInPixels = lineHeight; // 使用默认的行高
-    //       }
-    //       visibleLines += Math.ceil(item.scrollHeight / lineHeightInPixels);
-    //       // console.log(visibleLines, item, "visibleLines");
-    //       // 生成行号
-    //     });
-    //   };
-    //   requestAnimationFrame(() => {
-    //     updateSoftLineNumbers(codeDiv);
-    //   });
-    // };
-    // const renderCodeLines = (startLine, endLine) => {
-    //   code.split("\n").forEach((line) => {
-    //     const divContainerLines = document.createElement("div");
-
-    //     const codeContainerLine = document.createElement("pre");
-    //     codeContainerLine.style.whiteSpace = "pre-wrap";
-    //     codeContainerLine.style.margin = "0";
-    //     codeContainerLine.style.paddingLeft = "4px";
-    //     codeContainerLine.style.lineHeight = "16px";
-    //     codeContainerLine.style.minHeight = "16px"; // 或者移除height属性
-
-    //     if (customHighlight.length > 0) {
-    //       customHighlighted(
-    //         line,
-    //         mode,
-    //         codeContainerLine,
-    //         customHighlight,
-    //         styleTag
-    //       );
-    //     } else {
-    //       highlightRunMode(line, mode, codeContainerLine);
-    //     }
-
-    //     divContainerLines.appendChild(codeContainerLine);
-
-    //     codeDiv.appendChild(divContainerLines);
-    //   });
-    // };
-    // renderLineNumbers();
-    // renderCodeLines();
-
-    // lineContainer.appendChild(codeDiv);
-    // // pre.appendChild(lineContainer);
-    // divContainerLines.appendChild(lineContainer);
-    // divContainer.appendChild(divContainerLines);
-    // // generateSoftLineNumbers(divContainer, code, mode);
-    // container.appendChild(divContainer);
 
     // 将 DivGutter 与 divContainerLines 放置到一起
     divContainer.appendChild(DivGutter);
@@ -394,15 +275,14 @@ export function getHighlightedHtml(
       return;
     }
 
-    // 然后调用 renderCodeWithLineNumbers
-
     renderCodeWithLineNumbers(
-      divContainerLines, // 容器
-      code, // 代码
-      mode,
+      divContainer, // 包含代码和行号的主容器
+      divContainerLines, // 容器，用于存放代码行
+      code, // 代码内容
+      mode, // 高亮模式
       16, // 每行的高度 (可以调整)
-      customHighlight, // 高亮行（传递给 highlightLines）
-      styleTag
+      customHighlight, // 自定义高亮行数组
+      styleTag // 用于动态插入样式的 <style> 标签
     );
 
     // 将 DivGutter 与 divContainerLines 放置到一起
@@ -544,88 +424,766 @@ export function editCode(code, mode, container) {
     readOnly: false,
   });
 }
-export function editText(code, mode, container, isEdit) {
-  console.log(container, "c");
-  const textArea = document.createElement("textarea");
-  textArea.value = code;
-  container.innerHTML = "";
-  container.appendChild(textArea);
-  const editor = CodeMirror.fromTextArea(textArea, {
-    value: code,
-    mode,
-    lineNumbers: true,
-    theme: "custom-theme",
-  });
-}
 
-// @param {HTMLElement} codeContainer - 包含代码的容器，行号和代码行将被添加到其中。
-export function generateSoftLineNumbers(
-  codeContainer,
-  code,
-  mode,
-  customHighlight = [],
-  lineHeight = 15.2
-) {
-  codeContainer.innerHTML = "";
+// export function renderCodeWithLineNumbers(
+//   divContainer,
+//   container,
+//   code,
+//   mode,
+//   lineHeight = 16,
+//   customHighlight = [],
+//   styleTag
+// ) {
+//   const lines = code.split("\n"); // 将代码按行分割
+//   const totalLines = lines.length; // 代码的总行数
+//   const containerHeight = container.clientHeight; // 获取容器的高度 B
 
-  const outerContainer = document.createElement("div");
-  outerContainer.style.display = "flex";
-  outerContainer.style.flexDirection = "row";
-  // outerContainer.style.backgroundColor = "yellow";
+//   // 创建容器和占位符
+//   // const virtualWrapper = document.createElement("div");
+//   // virtualWrapper.style.position = "relative";
+//   // virtualWrapper.style.height = `${totalLines * lineHeight}px`; // 设定总高度
+//   // container.appendChild(virtualWrapper);
+//   // 创建行号和代码容器
+//   const divContainerLines = document.createElement("div");
+//   divContainerLines.style.position = "relative";
+//   divContainerLines.style.backgroundColor = "#353f58";
+//   divContainerLines.style.color = "#dcdcdc";
+//   divContainerLines.style.fontSize = "14px";
+//   divContainerLines.style.fontFamily = "monospace";
+//   container.appendChild(divContainerLines);
 
-  //创建行号容器
-  const lineNumberContainer = document.createElement("div");
-  lineNumberContainer.style.width = "30px"; // 固定宽度，容纳行号
-  lineNumberContainer.style.paddingTop = "4px";
-  lineNumberContainer.style.backgroundColor = "#f4f4f4";
-  lineNumberContainer.style.textAlign = "center";
+//   const codeDiv = document.createElement("div");
+//   codeDiv.style.paddingTop = "4px";
+//   divContainerLines.appendChild(codeDiv);
 
-  const codeWrapper = document.createElement("div");
-  codeWrapper.style.flex = "1";
-  codeWrapper.style.whiteSpace = "pre-wrap";
-  codeWrapper.style.overflowY = "auto";
-  codeWrapper.style.maxHeight = "1500px";
-  codeWrapper.style.fontFamily = "monospace";
-  codeWrapper.style.lineHeight = `${lineHeight}px`;
+//   const lineDiv = document.createElement("div");
+//   lineDiv.style.position = "relative";
+//   divContainerLines.appendChild(lineDiv);
 
-  const codeLines = code.split("\n");
-  codeLines.forEach((line, index) => {
-    const codeLineDiv = document.createElement("div");
-    codeLineDiv.textContent = line;
-    //自定义高亮
-    customHighlighted(line, mode, codeLineDiv, customHighlight);
-    codeWrapper.appendChild(codeLineDiv);
-  });
-  const updateLineNumbers = () => {
-    lineNumberContainer.innerHTML = "";
-    let currentLineNumber = 1;
-    codeWrapper.childNodes.forEach((codeLineDiv) => {
-      const wrappedHeight = codeLineDiv.scrollHeight;
-      const visibleLines = Math.ceil(wrappedHeight / lineHeight);
-      for (let i = 0; i < visibleLines; i++) {
-        const lineNumberDiv = document.createElement("div");
-        lineNumberDiv.textContent = currentLineNumber;
-        lineNumberDiv.style.height = `${lineHeight}px`;
-        lineNumberContainer.appendChild(lineNumberDiv);
-        currentLineNumber++;
-      }
-    });
-  };
-  outerContainer.appendChild(lineNumberContainer);
-  outerContainer.appendChild(codeWrapper);
-  codeContainer.appendChild(outerContainer);
+//   // 计算每行的实际高度（考虑换行的情况）
 
-  // 初始化和绑定滚动事件
-  updateLineNumbers();
-  codeWrapper.addEventListener("scroll", () => {
-    const scrollTop = codeWrapper.scrollTop;
-    lineNumberContainer.style.transform = `translateY(-${scrollTop}px)`;
-  });
+//   async function calculateLineHeight(codeLine) {
+//     return new Promise((resolve) => {
+//       const tempDiv = document.createElement("div");
+//       tempDiv.style.whiteSpace = "pre-wrap";
+//       tempDiv.style.margin = "0";
+//       tempDiv.style.paddingLeft = "4px";
+//       tempDiv.style.lineHeight = `${lineHeight}px`;
+//       tempDiv.style.minHeight = `${lineHeight}px`;
+//       tempDiv.style.fontFamily = "monospace";
 
-  // 动态调整窗口大小时更新行号
-  window.addEventListener("resize", updateLineNumbers);
-}
+//       // 如果有 codeLine 内容，进行自定义高亮
+//       if (codeLine.length > 0) {
+//         customHighlighted(codeLine, mode, tempDiv, customHighlight, styleTag);
+//       } else {
+//         highlightRunMode(codeLine, mode, tempDiv);
+//       }
+
+//       tempDiv.style.width = "1159px";
+//       document.body.appendChild(tempDiv);
+
+//       // 获取行数的计算
+//       function getLineCount() {
+//         return new Promise((resolve) => {
+//           requestAnimationFrame(function () {
+//             const height = tempDiv.clientHeight; // 获取高度
+//             const lineCount = Math.ceil(height / lineHeight);
+//             resolve(lineCount); // 通过 Promise 返回行数
+//           });
+//         });
+//       }
+
+//       // 调用获取行数的函数并返回结果
+//       getLineCount().then((lineCount) => {
+//         // 移除临时的 div 元素
+//         document.body.removeChild(tempDiv);
+//         // 返回计算的行数
+//         resolve(lineCount);
+//       });
+//     });
+//   }
+
+//   let linesNum = 0;
+//   // 渲染每一行的函数
+//   async function renderLine(lineNum, codeLine) {
+//     const lineHeightInPixels = await calculateLineHeight(codeLine);
+
+//     if (lineHeightInPixels > 1) {
+//       linesNum += lineHeightInPixels;
+//       console.log(linesNum, "linesNum11");
+//     }
+
+//     const codeContainerLine = document.createElement("pre");
+//     codeContainerLine.style.whiteSpace = "pre-wrap";
+//     codeContainerLine.style.margin = "0";
+//     codeContainerLine.style.paddingLeft = "4px";
+//     codeContainerLine.style.lineHeight = `${lineHeight}px`;
+//     codeContainerLine.style.minHeight = `${lineHeight}px`;
+
+//     if (codeLine.length > 0) {
+//       customHighlighted(
+//         codeLine,
+//         mode,
+//         codeContainerLine,
+//         customHighlight,
+//         styleTag
+//       );
+//     } else {
+//       highlightRunMode(codeLine, mode, codeContainerLine);
+//     }
+
+//     const numberDiv = document.createElement("div");
+//     numberDiv.style.position = "relative";
+
+//     const numberDivs = document.createElement("div");
+
+//     const lineNumberDiv = document.createElement("div");
+//     // lineNumberDiv.innerText = `${lineNum}`;
+//     lineNumberDiv.style.textAlign = "center";
+//     lineNumberDiv.style.position = "absolute";
+//     lineNumberDiv.style.left = "-31px";
+//     lineNumberDiv.style.color = "#fff";
+//     lineNumberDiv.style.width = "31px"; // 行号宽度
+//     lineNumberDiv.style.lineHeight = `${lineHeight}px`;
+//     lineNumberDiv.style.minHeight = `${lineHeight}px`;
+//     lineNumberDiv.style.zIndex = "4";
+//     lineNumberDiv.style.fontSize = "14px";
+//     lineNumberDiv.style.fontFamily = "monospace";
+
+//     if (lineHeightInPixels > 1) {
+//       // 循环创建多行行号 div
+//       for (let i = 1; i <= lineHeightInPixels; i++) {
+//         numberDivs.style.display = "flex";
+//         numberDivs.style.flexDirection = "column"; // 垂直排列
+//         numberDivs.style.position = "relative";
+
+//         const lineNumberDiv = document.createElement("div");
+//         // lineNumberDiv.innerText = `${lineNum}`;
+//         lineNumberDiv.style.textAlign = "center";
+//         lineNumberDiv.style.position = "absolute";
+//         lineNumberDiv.style.left = "-31px";
+//         lineNumberDiv.style.top = `${lineHeight * (i - 1)}px`;
+//         lineNumberDiv.style.color = "#fff";
+//         lineNumberDiv.style.width = "31px"; // 行号宽度
+//         lineNumberDiv.style.lineHeight = `${lineHeight}px`;
+//         lineNumberDiv.style.minHeight = `${lineHeight}px`;
+//         lineNumberDiv.style.zIndex = "4";
+//         lineNumberDiv.style.fontSize = "14px";
+//         lineNumberDiv.style.fontFamily = "monospace";
+//         lineNumberDiv.innerText = `${lineNum + i - 1}`;
+
+//         // 将行号 div 添加到 numberDiv 中
+//         numberDivs.appendChild(lineNumberDiv);
+//       }
+//       numberDiv.appendChild(numberDivs);
+//     } else {
+//       lineNum += linesNum;
+//       console.log(lineNum, "lineNum");
+
+//       // 如果行高等于 1，仅显示一行行号
+//       lineNumberDiv.innerText = `${lineNum}`;
+//       numberDiv.appendChild(lineNumberDiv);
+//     }
+
+//     // numberDiv.appendChild(lineNumberDiv);
+//     lineDiv.appendChild(numberDiv);
+//     lineDiv.appendChild(codeContainerLine);
+//     codeDiv.appendChild(lineDiv);
+//   }
+
+//   // 渲染可见行
+//   async function renderVisibleLines(scrollTop) {
+//     let startLine = 0;
+//     let endLine = 0;
+//     let currentHeight = 0;
+
+//     // 计算开始行和结束行
+//     console.log(scrollTop, "scrollTop");
+
+//     for (let i = 0; i < totalLines; i++) {
+//       // 调用方式示例
+//       const lineHeightInPixels = await calculateLineHeight(lines[i]);
+//       if (currentHeight >= scrollTop && startLine === 0) {
+//         startLine = i;
+//       }
+//       if (currentHeight > scrollTop + containerHeight) {
+//         endLine = i;
+//         break;
+//       }
+//       currentHeight += lineHeightInPixels * lineHeight; // 累加行高
+//     }
+
+//     endLine = endLine || totalLines;
+//     // 清空已渲染的行
+//     lineDiv.innerHTML = "";
+//     codeDiv.innerHTML = "";
+//     console.log(startLine, "startLine");
+//     console.log(endLine, "startLine");
+
+//     // 渲染当前可见行
+//     for (let i = startLine; i < endLine; i++) {
+//       renderLine(i, lines[i]); // 渲染每一行，i + 1 是行号
+//     }
+//   }
+
+//   // 监听滚动事件
+//   divContainer.addEventListener("scroll", () => {
+//     const scrollTop = divContainer.scrollTop;
+//     renderVisibleLines(scrollTop); // 根据滚动位置渲染可见行
+//   });
+//   // 初始化渲染，渲染首次可见区域
+//   renderVisibleLines(0);
+// }
+
+
+
+
+
+// export function renderCodeWithLineNumbers(
+//   divContainer,
+//   container,
+//   code,
+//   mode,
+//   lineHeight = 16,
+//   customHighlight = [],
+//   styleTag
+// ) {
+//   if (!code) {
+//     console.error("Code content is undefined!");
+//     return;
+//   }
+
+//   const lines = code.split("\n");
+
+//   // **创建滚动占位容器**
+//   divContainer.style.overflowY = "auto"; // 让 `divContainer` 变成滚动容器
+
+//   const scrollerContainer = document.createElement("div");
+//   scrollerContainer.style.position = "relative"; // 作为 `VirtualScroller` 的内容容器
+//   scrollerContainer.style.width = "100%";
+//   divContainer.appendChild(scrollerContainer); // **直接挂载到滚动容器**
+
+//   // **计算每行的实际高度（高亮后）**
+//   async function calculateLineHeight(text, mode) {
+//     return new Promise((resolve) => {
+//       const tempDiv = document.createElement("div");
+//       tempDiv.style.whiteSpace = "pre-wrap";
+//       tempDiv.style.fontFamily = "monospace";
+//       tempDiv.style.visibility = "hidden";
+//       tempDiv.style.position = "absolute";
+//       tempDiv.style.width = "fit-content";
+//       tempDiv.style.lineHeight = `${lineHeight}px`;
+//       document.body.appendChild(tempDiv);
+
+//       customHighlighted(text, mode, tempDiv, customHighlight, styleTag);
+
+//       requestAnimationFrame(() => {
+//         const height = tempDiv.offsetHeight;
+//         document.body.removeChild(tempDiv);
+//         resolve(height || lineHeight);
+//       });
+//     });
+//   }
+
+//   // **初始化行数据**
+//   async function initializeItems() {
+//     let offset = 0;
+//     const itemPromises = lines.map(async (line, index) => {
+//       const height = await calculateLineHeight(line, mode);
+//       const item = { index, text: line, height, offset };
+//       offset += height;
+//       return item;
+//     });
+
+//     return Promise.all(itemPromises);
+//   }
+
+//   initializeItems().then((items) => {
+//     // **设置 `scrollerContainer` 总高度**
+//     scrollerContainer.style.height = `${
+//       items[items.length - 1].offset + items[items.length - 1].height
+//     }px`;
+
+//     // **渲染单行代码**
+//     function renderItem(item) {
+//       if (!item) return document.createElement("div");
+
+//       const lineContainer = document.createElement("div");
+//       lineContainer.style.position = "absolute";
+//       lineContainer.style.top = `${item.offset}px`;
+//       lineContainer.style.width = "100%";
+//       lineContainer.style.height = `${item.height}px`;
+//       lineContainer.style.display = "flex";
+//       lineContainer.style.alignItems = "center";
+
+//       // **行号**
+//       const lineNumberDiv = document.createElement("div");
+//       lineNumberDiv.style.width = "40px";
+//       lineNumberDiv.style.textAlign = "center";
+//       lineNumberDiv.style.color = "#fff";
+//       lineNumberDiv.style.paddingRight = "10px";
+//       lineNumberDiv.textContent = `${item.index + 1}`;
+//       lineNumberDiv.style.fontFamily = "monospace";
+
+//       // **代码行**
+//       const codeContainer = document.createElement("pre");
+//       codeContainer.style.margin = "0";
+//       codeContainer.style.whiteSpace = "pre-wrap";
+//       codeContainer.style.fontFamily = "monospace";
+
+//       requestAnimationFrame(() => {
+//         customHighlighted(item.text, mode, codeContainer, customHighlight, styleTag);
+//       });
+
+//       lineContainer.appendChild(lineNumberDiv);
+//       lineContainer.appendChild(codeContainer);
+
+//       return lineContainer;
+//     }
+
+//     // **初始化 `VirtualScroller`**
+//     const virtualScroller = new VirtualScroller(
+//       scrollerContainer,
+//       items.slice(0, 20), // **✅ 只加载前 20 行**
+//       renderItem,
+//       {
+//         itemHeight: (index) => items[index]?.height || lineHeight, // 动态获取行高
+//         scrollContainer: divContainer,
+//         onItemHeightDidChange: (index) => {
+//           console.log(`行高发生变化：${index}`);
+//         },
+//       }
+//     );
+
+//     // **监听高度变化**
+//     const observer = new ResizeObserver((entries) => {
+//       for (const entry of entries) {
+//         const index = Number(entry.target.dataset.index);
+//         if (index >= 0 && index < items.length) {
+//           const newHeight = entry.target.offsetHeight;
+//           if (newHeight !== items[index].height) {
+//             items[index].height = newHeight;
+//             items[index].offset =
+//               index === 0 ? 0 : items[index - 1].offset + items[index - 1].height;
+//             virtualScroller.setItems([...items]);
+//           }
+//         }
+//       }
+//     });
+
+//     let currentItems = items.slice(0, 20);
+//     divContainer.addEventListener("scroll", () => {
+//       const scrollTop = divContainer.scrollTop;
+//       const visibleCount = Math.ceil(divContainer.clientHeight / lineHeight);
+//       const startIndex = Math.max(0, Math.floor(scrollTop / lineHeight-3) );
+//       const endIndex = Math.min(items.length, startIndex + visibleCount +3);
+
+//       const newItems = items.slice(startIndex, endIndex);
+//       console.log(newItems,'newItems');
+      
+//       currentItems = [...newItems];
+//       console.log("当前 VirtualScroller items 数组:", items.slice(50, 60));
+//       virtualScroller.setItems(currentItems);
+
+//       // **监听新渲染的元素**
+//       document.querySelectorAll(".virtual-item").forEach((el) => observer.observe(el));
+//     });
+
+//     document.addEventListener("DOMContentLoaded", () => {
+//       virtualScroller.setItems(items.slice(0, 20));
+//     });
+//   });
+// }
+// export function renderCodeWithLineNumbers(
+//   divContainer,
+//   container,
+//   code,
+//   mode,
+//   lineHeight = 16,
+//   customHighlight = [],
+//   styleTag
+// ) {
+//   const lines = code.split("\n");
+//   let items = lines.map((text, index) => ({
+//     index,
+//     text,
+//     height: lineHeight,
+//     offset: index * lineHeight
+//   }));
+
+//   const scrollerContainer = document.createElement("div");
+//   scrollerContainer.style.position = "relative";
+//   scrollerContainer.style.height = `${items[items.length - 1].offset + items[items.length - 1].height}px`;
+//   divContainer.appendChild(scrollerContainer);
+
+//   // 渲染单行
+//   const renderItem = (item) => {
+//     const lineContainer = document.createElement("div");
+//     lineContainer.style.position = "absolute";
+//     lineContainer.style.top = `${item.offset}px`;
+//     lineContainer.style.width = "100%";
+//     lineContainer.style.height = `${item.height}px`;
+
+//     // 行号
+//     const lineNumber = document.createElement("div");
+//     lineNumber.textContent = item.index + 1;
+//     lineNumber.style.width = "40px";
+
+//     // 代码内容
+//     const codeContent = document.createElement("pre");
+//     customHighlighted(item.text, mode, codeContent, customHighlight, styleTag);
+
+//     // 动态计算高度
+//     const updateHeight = () => {
+//       const newHeight = codeContent.offsetHeight;
+//       if (newHeight === item.height) return;
+      
+//       item.height = newHeight;
+//       let offset = item.offset + item.height;
+//       for (let i = item.index + 1; i < items.length; i++) {
+//         items[i].offset = offset;
+//         offset += items[i].height;
+//       }
+//       scrollerContainer.style.height = `${offset}px`;
+//       virtualScroller.updateItem(item.index);
+//     };
+
+//     requestAnimationFrame(updateHeight);
+//     const observer = new ResizeObserver(updateHeight);
+//     observer.observe(codeContent);
+//     lineContainer._observer = observer;
+
+//     lineContainer.append(lineNumber, codeContent);
+//     return lineContainer;
+//   };
+
+//   // 初始化 VirtualScroller
+//   const virtualScroller = new VirtualScroller({
+//     container: scrollerContainer,
+//     items,
+//     renderItem,
+//     itemHeight: (index) => items[index].height,
+//     scrollContainer: divContainer,
+//     renderBuffer: 20,
+//     onUnrenderItem: (el) => el._observer?.disconnect()
+//   });
+
+//   virtualScroller.init();
+// }
+//尝试使用使用库
+// export function renderCodeWithLineNumbers(
+//   divContainer,
+//   container,
+//   code,
+//   mode,
+//   lineHeight = 16,
+//   customHighlight = [],
+//   styleTag
+// ) {
+//   if (!code) {
+//     console.error("Code content is undefined!");
+//     return;
+//   }
+
+//   const lines = code.split("\n");
+
+//   // **创建滚动占位容器**
+//   divContainer.style.overflowY = "auto"; // 让 `divContainer` 变成滚动容器
+
+//   const scrollerContainer = document.createElement("div");
+//   scrollerContainer.style.position = "relative"; // 作为 `VirtualScroller` 的内容容器
+//   scrollerContainer.style.width = "100%";
+  
+//   divContainer.appendChild(scrollerContainer); // **直接挂载到滚动容器**
+
+//   // **计算每行的实际高度（高亮后）**
+//   async function calculateLineHeight(text, mode) {
+//     return new Promise((resolve) => {
+//       const tempDiv = document.createElement("div");
+//       tempDiv.style.whiteSpace = "pre-wrap";
+//       tempDiv.style.fontFamily = "monospace";
+//       tempDiv.style.visibility = "hidden";
+//       tempDiv.style.position = "absolute";
+//       tempDiv.style.width = "fit-content";
+//       tempDiv.style.lineHeight = `${lineHeight}px`;
+//       document.body.appendChild(tempDiv);
+
+//       customHighlighted(text, mode, tempDiv, customHighlight, styleTag);
+
+//       requestAnimationFrame(() => {
+//         const height = tempDiv.offsetHeight;
+//         document.body.removeChild(tempDiv);
+//         resolve(height || lineHeight);
+//       });
+//     });
+//   }
+
+//   // **初始化行数据**
+//   async function initializeItems() {
+//     let offset = 0;
+//     const itemPromises = lines.map(async (line, index) => {
+//       const height = await calculateLineHeight(line, mode);
+//       const item = { index, text: line, height, offset };
+//       offset += height;
+//       return item;
+//     });
+
+//     return Promise.all(itemPromises);
+//   }
+
+//   initializeItems().then((items) => {
+//     // **设置 `scrollerContainer` 总高度**
+//     scrollerContainer.style.height = `${
+//       items[items.length - 1].offset + items[items.length - 1].height
+//     }px`;
+//     // scrollerContainer.style.height=`100%`;
+
+//     // **渲染单行代码**
+//     function renderItem(item) {
+//       console.log(item,'2222');
+      
+//       if (!item) return document.createElement("div");
+
+//       const lineContainer = document.createElement("div");
+//       // lineContainer.style.position = "absolute";
+//       // lineContainer.style.top = `${item.offset}px`;
+//       lineContainer.style.width = "100%";
+//       lineContainer.style.height = `${item.height}px`;
+//       lineContainer.style.display = "flex";
+//       lineContainer.style.alignItems = "center";
+
+//       // **行号**
+//       const lineNumberDiv = document.createElement("div");
+//       lineNumberDiv.style.width = "40px";
+//       lineNumberDiv.style.textAlign = "center";
+//       lineNumberDiv.style.color = "#fff";
+//       lineNumberDiv.style.paddingRight = "10px";
+//       lineNumberDiv.textContent = `${item.index + 1}`;
+//       lineNumberDiv.style.fontFamily = "monospace";
+
+//       // **代码行**
+//       const codeContainer = document.createElement("pre");
+//       codeContainer.style.margin = "0";
+//       codeContainer.style.whiteSpace = "pre-wrap";
+//       codeContainer.style.fontFamily = "monospace";
+
+//       requestAnimationFrame(() => {
+//         customHighlighted(item.text, mode, codeContainer, customHighlight, styleTag);
+//       });
+
+//       lineContainer.appendChild(lineNumberDiv);
+//       lineContainer.appendChild(codeContainer);
+
+//       return lineContainer;
+//     }
+
+//     console.log(items,'11111');
+    
+//     // **初始化 `VirtualScroller`**
+//     const virtualScroller = new VirtualScroller(
+//       scrollerContainer,
+//       items, // **✅ 只加载前 20 行**
+//       renderItem,
+//     );
+
+//     // **监听高度变化**
+//     const observer = new ResizeObserver((entries) => {
+//       for (const entry of entries) {
+//         const index = Number(entry.target.dataset.index);
+//         if (index >= 0 && index < items.length) {
+//           const newHeight = entry.target.offsetHeight;
+//           if (newHeight !== items[index].height) {
+//             items[index].height = newHeight;
+//             items[index].offset =
+//               index === 0 ? 0 : items[index - 1].offset + items[index - 1].height;
+//             virtualScroller.setItems([...items]);
+//           }
+//         }
+//       }
+//     });
+
+//     // let currentItems = items.slice(0, 20);
+//     // divContainer.addEventListener("scroll", () => {
+//     //   const scrollTop = divContainer.scrollTop;
+//     //   const visibleCount = Math.ceil(divContainer.clientHeight / lineHeight);
+//     //   const startIndex = Math.max(0, Math.floor(scrollTop / lineHeight - 3));
+//     //   const endIndex = Math.min(items.length, startIndex + visibleCount );
+
+//     //   const newItems = items.slice(startIndex, endIndex);
+//     //   console.log(newItems, "newItems");
+
+//     //   currentItems = [...newItems];
+//     //   console.log("当前 VirtualScroller items 数组:", items.slice(50, 60));
+//     //   virtualScroller.setItems(currentItems);
+
+//     //   // **监听新渲染的元素**
+//     //   document.querySelectorAll(".virtual-item").forEach((el) => observer.observe(el));
+//     // });
+
+//     document.addEventListener("DOMContentLoaded", () => {
+//       virtualScroller.setItems(items.slice(0, 20));
+//     });
+//   });
+// }
+// export function renderCodeWithLineNumbers(
+//   divContainer,
+//   container,
+//   code,
+//   mode,
+//   lineHeight = 16,
+//   customHighlight = [],
+//   styleTag
+// ) {
+//   if (!code) {
+//     console.error("Code content is undefined!");
+//     return;
+//   }
+
+//   const lines = code.split("\n");
+
+//   // **创建滚动占位容器**
+//   divContainer.style.overflowY = "auto"; // 让 `divContainer` 变成滚动容器
+
+//   const scrollerContainer = document.createElement("div");
+//   scrollerContainer.style.position = "relative"; // 作为 `VirtualScroller` 的内容容器
+//   scrollerContainer.style.width = "100%";
+  
+//   divContainer.appendChild(scrollerContainer); // **直接挂载到滚动容器**
+
+//   // **计算每行的实际高度（高亮后）**
+//   async function calculateLineHeight(text, mode) {
+//     return new Promise((resolve) => {
+//       const tempDiv = document.createElement("div");
+//       tempDiv.style.whiteSpace = "pre-wrap";
+//       tempDiv.style.fontFamily = "monospace";
+//       tempDiv.style.visibility = "hidden";
+//       tempDiv.style.position = "absolute";
+//       tempDiv.style.width = "fit-content";
+//       tempDiv.style.lineHeight = `${lineHeight}px`;
+//       document.body.appendChild(tempDiv);
+
+//       customHighlighted(text, mode, tempDiv, customHighlight, styleTag);
+
+//       requestAnimationFrame(() => {
+//         const height = tempDiv.offsetHeight;
+//         document.body.removeChild(tempDiv);
+//         resolve(height || lineHeight);
+//       });
+//     });
+//   }
+
+//   // **初始化行数据**
+//   async function initializeItems() {
+//     let offset = 0;
+//     const itemPromises = lines.map(async (line, index) => {
+//       const height = await calculateLineHeight(line, mode);
+//       const item = { index, text: line, height, offset };
+//       offset += height;
+//       return item;
+//     });
+
+//     return Promise.all(itemPromises);
+//   }
+
+//   initializeItems().then((items) => {
+//     // **设置 `scrollerContainer` 总高度**
+//     // scrollerContainer.style.height = `${
+//     //   items[items.length - 1].offset + items[items.length - 1].height
+//     // }px`;
+//     // scrollerContainer.style.height='100%';
+
+//     // **渲染单行代码**
+//     function renderItem(item) {
+//       console.log(item,'2222');
+      
+//       if (!item) return document.createElement("div");
+
+//       const lineContainer = document.createElement("div");
+//       // lineContainer.style.position = "absolute";
+//       // lineContainer.style.top = `${item.offset}px`;
+//       lineContainer.style.width = "100%";
+//       lineContainer.style.height = `${item.height}px`;
+//       lineContainer.style.display = "flex";
+//       lineContainer.style.alignItems = "center";
+
+//       // **行号**
+//       const lineNumberDiv = document.createElement("div");
+//       lineNumberDiv.style.width = "40px";
+//       lineNumberDiv.style.textAlign = "center";
+//       lineNumberDiv.style.color = "#fff";
+//       lineNumberDiv.style.paddingRight = "10px";
+//       lineNumberDiv.textContent = `${item.index + 1}`;
+//       lineNumberDiv.style.fontFamily = "monospace";
+
+//       // **代码行**
+//       const codeContainer = document.createElement("pre");
+//       codeContainer.style.margin = "0";
+//       codeContainer.style.whiteSpace = "pre-wrap";
+//       codeContainer.style.fontFamily = "monospace";
+
+//       requestAnimationFrame(() => {
+//         customHighlighted(item.text, mode, codeContainer, customHighlight, styleTag);
+//       });
+
+//       lineContainer.appendChild(lineNumberDiv);
+//       lineContainer.appendChild(codeContainer);
+
+//       return lineContainer;
+//     }
+    
+//     // **初始化 `VirtualScroller`**
+//     const virtualScroller = new VirtualScroller(
+//       scrollerContainer,
+//       items, 
+//       renderItem,
+//       {
+        
+//         itemHeight: (index) => items[index]?.height || lineHeight, // ✅ 让 VirtualScroller 计算每行高度
+//         scrollerContainer:divContainer ,
+//         renderBuffer: 5, // ✅ 预加载 5 行，避免滚动时白屏
+//       }
+//     );
+
+//     // // **监听高度变化**
+//     // const observer = new ResizeObserver((entries) => {
+//     //   for (const entry of entries) {
+//     //     const index = Number(entry.target.dataset.index);
+//     //     if (index >= 0 && index < items.length) {
+//     //       const newHeight = entry.target.offsetHeight;
+//     //       if (newHeight !== items[index].height) {
+//     //         items[index].height = newHeight;
+//     //         items[index].offset =
+//     //           index === 0 ? 0 : items[index - 1].offset + items[index - 1].height;
+//     //         virtualScroller.setItems([...items]);
+//     //       }
+//     //     }
+//     //   }
+//     // });
+
+//     divContainer.addEventListener("scroll", () => {
+//       // const scrollTop = divContainer.scrollTop;
+//       // const visibleCount = Math.ceil(divContainer.clientHeight / lineHeight);
+//       // const startIndex = Math.max(0, Math.floor(scrollTop / lineHeight - 3));
+//       // const endIndex = Math.min(items.length, startIndex + visibleCount );
+
+//       // const newItems = items.slice(startIndex, endIndex);
+//       // console.log(newItems, "newItems");
+
+//       // currentItems = [...newItems];
+//       // console.log("当前 VirtualScroller items 数组:", items.slice(50, 60));
+//       // virtualScroller.setItems(currentItems);
+
+//       // // **监听新渲染的元素**
+//       // document.querySelectorAll(".virtual-item").forEach((el) => observer.observe(el));
+//     });
+
+//     document.addEventListener("DOMContentLoaded", () => {
+//       virtualScroller.setItems(items);
+//     });
+//   });
+// }
 export function renderCodeWithLineNumbers(
+  divContainer,
   container,
   code,
   mode,
@@ -633,192 +1191,106 @@ export function renderCodeWithLineNumbers(
   customHighlight = [],
   styleTag
 ) {
-  const lines = code.split("\n"); // 将代码按行分割
-  const totalLines = lines.length; // 代码的总行数
-  const containerHeight = container.clientHeight; // 获取容器的高度 B
-  // 创建行号和代码容器
-  const divContainerLines = document.createElement("div");
-  divContainerLines.style.position = "relative";
-  divContainerLines.style.backgroundColor = "#353f58";
-  divContainerLines.style.color = "#dcdcdc";
-  divContainerLines.style.fontSize = "14px";
-  divContainerLines.style.fontFamily = "monospace";
-  container.appendChild(divContainerLines);
+  if (!code) {
+    console.error("Code content is undefined!");
+    return;
+  }
 
-  const codeDiv = document.createElement("div");
-  codeDiv.style.paddingTop = "4px";
-  divContainerLines.appendChild(codeDiv);
+  const lines = code.split("\n");
 
-  const lineDiv = document.createElement("div");
-  lineDiv.style.position = "relative";
-  divContainerLines.appendChild(lineDiv);
+  divContainer.style.overflowY = "auto"; // ✅ 让 container 滚动
 
-  // 计算每行的实际高度（考虑换行的情况）
+  // ✅ 创建 VirtualScroller 容器
+  const scrollerContainer = document.createElement("div");
+  scrollerContainer.style.position = "relative";
+  scrollerContainer.style.width = "100%";
+  divContainer.appendChild(scrollerContainer);
 
-  async function calculateLineHeight(codeLine) {
+  // ✅ 计算每行的高度
+  async function calculateLineHeight(text, mode) {
     return new Promise((resolve) => {
       const tempDiv = document.createElement("div");
       tempDiv.style.whiteSpace = "pre-wrap";
-      tempDiv.style.margin = "0";
-      tempDiv.style.paddingLeft = "4px";
-      tempDiv.style.lineHeight = `${lineHeight}px`;
-      tempDiv.style.minHeight = `${lineHeight}px`;
       tempDiv.style.fontFamily = "monospace";
-
-      // 如果有 codeLine 内容，进行自定义高亮
-      if (codeLine.length > 0) {
-        customHighlighted(codeLine, mode, tempDiv, customHighlight, styleTag);
-      } else {
-        highlightRunMode(codeLine, mode, tempDiv);
-      }
-
-      tempDiv.style.width = "1159px";
+      tempDiv.style.visibility = "hidden";
+      tempDiv.style.position = "absolute";
+      tempDiv.style.width = "fit-content";
+      tempDiv.style.lineHeight = `${lineHeight}px`;
       document.body.appendChild(tempDiv);
 
-      // 获取行数的计算
-      function getLineCount() {
-        return new Promise((resolve) => {
-          requestAnimationFrame(function () {
-            const height = tempDiv.clientHeight; // 获取高度
-            const lineCount = Math.ceil(height / lineHeight);
-            resolve(lineCount); // 通过 Promise 返回行数
-          });
-        });
-      }
+      customHighlighted(text, mode, tempDiv, customHighlight, styleTag);
 
-      // 调用获取行数的函数并返回结果
-      getLineCount().then((lineCount) => {
-        // 移除临时的 div 元素
+      requestAnimationFrame(() => {
+        const height = tempDiv.offsetHeight;
         document.body.removeChild(tempDiv);
-
-        // 返回计算的行数
-        resolve(lineCount);
+        resolve(height || lineHeight);
       });
     });
   }
 
-  // 渲染每一行的函数
-  async function renderLine(lineNum, codeLine) {
-    const codeContainerLine = document.createElement("pre");
-    codeContainerLine.style.whiteSpace = "pre-wrap";
-    codeContainerLine.style.margin = "0";
-    codeContainerLine.style.paddingLeft = "4px";
-    codeContainerLine.style.lineHeight = `${lineHeight}px`;
-    codeContainerLine.style.minHeight = `${lineHeight}px`;
+  // ✅ 初始化数据
+  async function initializeItems() {
+    let offset = 0;
+    const itemPromises = lines.map(async (line, index) => {
+      const height = await calculateLineHeight(line, mode);
+      const item = { index, text: line, height, offset };
+      offset += height;
+      return item;
+    });
 
-    if (codeLine.length > 0) {
-      customHighlighted(
-        codeLine,
-        mode,
-        codeContainerLine,
-        customHighlight,
-        styleTag
-      );
-    } else {
-      highlightRunMode(codeLine, mode, codeContainerLine);
-    }
-
-    const numberDiv = document.createElement("div");
-    numberDiv.style.position = "relative";
-
-    const numberDivs = document.createElement("div");
-
-    const lineNumberDiv = document.createElement("div");
-    // lineNumberDiv.innerText = `${lineNum}`;
-    lineNumberDiv.style.textAlign = "center";
-    lineNumberDiv.style.position = "absolute";
-    lineNumberDiv.style.left = "-31px";
-    lineNumberDiv.style.color = "#fff";
-    lineNumberDiv.style.width = "31px"; // 行号宽度
-    lineNumberDiv.style.lineHeight = `${lineHeight}px`;
-    lineNumberDiv.style.minHeight = `${lineHeight}px`;
-    lineNumberDiv.style.zIndex = "4";
-    lineNumberDiv.style.fontSize = "14px";
-    lineNumberDiv.style.fontFamily = "monospace";
-
-    const lineHeightInPixels = await calculateLineHeight(codeLine);
-    console.log(lineHeightInPixels, "lineHeightInPixels1");
-    if (lineHeightInPixels > 1) {
-      // 循环创建多行行号 div
-      for (let i = 1; i <= lineHeightInPixels; i++) {
-        numberDivs.style.display = "flex";
-        numberDivs.style.flexDirection = "column"; // 垂直排列
-        numberDivs.style.position = "relative";
-
-        const lineNumberDiv = document.createElement("div");
-        // lineNumberDiv.innerText = `${lineNum}`;
-        lineNumberDiv.style.textAlign = "center";
-        lineNumberDiv.style.position = "absolute";
-        lineNumberDiv.style.left = "-31px";
-        lineNumberDiv.style.top = `${lineHeight * (i - 1)}px`;
-        lineNumberDiv.style.color = "#fff";
-        lineNumberDiv.style.width = "31px"; // 行号宽度
-        lineNumberDiv.style.lineHeight = `${lineHeight}px`;
-        lineNumberDiv.style.minHeight = `${lineHeight}px`;
-        lineNumberDiv.style.zIndex = "4";
-        lineNumberDiv.style.fontSize = "14px";
-        lineNumberDiv.style.fontFamily = "monospace";
-        lineNumberDiv.innerText = `${lineNum + i - 1}`;
-        console.log(lineNumberDiv, "lineNumberDiv11");
-
-        // 将行号 div 添加到 numberDiv 中
-        numberDivs.appendChild(lineNumberDiv);
-      }
-      numberDiv.appendChild(numberDivs);
-    } else {
-      // 如果行高等于 1，仅显示一行行号
-      lineNumberDiv.innerText = `${lineNum}`;
-      numberDiv.appendChild(lineNumberDiv);
-    }
-
-    // numberDiv.appendChild(lineNumberDiv);
-    lineDiv.appendChild(numberDiv);
-    lineDiv.appendChild(codeContainerLine);
-    codeDiv.appendChild(lineDiv);
+    return Promise.all(itemPromises);
   }
 
-  // 渲染可见行
-  async function renderVisibleLines(scrollTop) {
-    let startLine = 0;
-    let endLine = 0;
-    let currentHeight = 0;
+  initializeItems().then((items) => {
+    // ✅ 设置 `scrollerContainer` 总高度（撑开滚动区域）
+    scrollerContainer.style.height = `${
+      items[items.length - 1].offset + items[items.length - 1].height
+    }px`;
 
-    // 计算开始行和结束行
-    for (let i = 0; i < totalLines; i++) {
-      // 调用方式示例
-      const lineHeightInPixels = await calculateLineHeight(lines[i]);
-      // const lineHeightInPixels = calculateLineHeight(); // 获取当前行的实际行数
-      // console.log(lineHeightInPixels, "lineHeightInPixels1");
+    function renderItem(item) {
+      if (!item) return document.createElement("div");
 
-      // 计算滚动区域内的行
-      if (currentHeight >= scrollTop && startLine === 0) {
-        startLine = i;
-      }
-      if (currentHeight > scrollTop + containerHeight) {
-        endLine = i;
-        break;
-      }
-      currentHeight += lineHeightInPixels * lineHeight; // 累加行高
+      const lineContainer = document.createElement("div");
+      lineContainer.style.position = "absolute";
+      lineContainer.style.top = `${item.offset}px`;
+      lineContainer.style.width = "100%";
+      lineContainer.style.height = `${item.height}px`;
+      lineContainer.style.display = "flex";
+      lineContainer.style.alignItems = "center";
+
+      const lineNumberDiv = document.createElement("div");
+      lineNumberDiv.style.width = "40px";
+      lineNumberDiv.style.textAlign = "center";
+      lineNumberDiv.style.color = "#fff";
+      lineNumberDiv.style.paddingRight = "10px";
+      lineNumberDiv.textContent = `${item.index + 1}`;
+      lineNumberDiv.style.fontFamily = "monospace";
+
+      const codeContainer = document.createElement("pre");
+      codeContainer.style.margin = "0";
+      codeContainer.style.whiteSpace = "pre-wrap";
+      codeContainer.style.fontFamily = "monospace";
+
+      requestAnimationFrame(() => {
+        customHighlighted(item.text, mode, codeContainer, customHighlight, styleTag);
+      });
+
+      lineContainer.appendChild(lineNumberDiv);
+      lineContainer.appendChild(codeContainer);
+
+      return lineContainer;
     }
 
-    endLine = endLine || totalLines;
-    // 清空已渲染的行
-    lineDiv.innerHTML = "";
-    codeDiv.innerHTML = "";
-    console.log(startLine, "startLine");
-    console.log(endLine, "startLine");
+    // ✅ **正确初始化 VirtualScroller**
+    const virtualScroller = new VirtualScroller(scrollerContainer, items, renderItem, {
+      itemHeight: (index) => items[index]?.height || lineHeight,
+      scrollContainer: divContainer, 
+      // renderBuffer: 5, 
+    });
 
-    // 渲染当前可见行
-    for (let i = startLine; i < endLine; i++) {
-      renderLine(i, lines[i]); // 渲染每一行，i + 1 是行号
-    }
-  }
-
-  // 监听滚动事件
-  container.addEventListener("scroll", () => {
-    const scrollTop = container.scrollTop;
-    renderVisibleLines(scrollTop); // 根据滚动位置渲染可见行
   });
-  // 初始化渲染，渲染首次可见区域
-  renderVisibleLines(0);
 }
+
+
+
+
